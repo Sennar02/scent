@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "alloc.hpp"
 
 namespace scent
@@ -5,6 +7,8 @@ namespace scent
     i8*
     next_aligned(i8* memory, u8 align)
     {
+        assert(align  != 0 && "Alignment is zero");
+
         uptr pntr = (uptr) memory;
         uptr diff = pntr % align;
 

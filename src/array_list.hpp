@@ -1,16 +1,22 @@
-#ifndef SCENT_ARR_LIST_HPP
-#define SCENT_ARR_LIST_HPP
+#ifndef SCENT_ARRAY_LIST_HPP
+#define SCENT_ARRAY_LIST_HPP
 
 #include "types.hpp"
+#include "slice.hpp"
 #include "alloc.hpp"
 #include "item_ref.hpp"
 
 namespace scent
 {
     template <class Val>
-    struct Arr_List final
+    struct Array_List final
     {
     private:
+        /**
+         *
+         */
+        Alloc* _alloc = 0;
+
         /**
          *
          */
@@ -30,24 +36,30 @@ namespace scent
         /**
          *
          */
-        Arr_List();
+        Array_List();
 
         /**
          *
          */
-        Arr_List(Alloc& alloc, u32 size);
-
-        /**
-         *
-         */
-        void
-        drop(Alloc& alloc);
+        Array_List(Alloc& alloc, u32 size);
 
         /**
          *
          */
         void
-        clear();
+        init(Alloc& alloc, u32 size);
+
+        /**
+         *
+         */
+        void
+        drop();
+
+        /**
+         *
+         */
+        void
+        reset();
 
         /**
          *
@@ -59,7 +71,19 @@ namespace scent
          *
          */
         u32
+        count() const;
+
+        /**
+         *
+         */
+        Slice<const Val>
         values() const;
+
+        /**
+         *
+         */
+        Slice<Val>
+        values();
 
         /**
          *
@@ -86,18 +110,6 @@ namespace scent
         isnt_full() const;
 
         /**
-         *
-         */
-        Item_Ref<const Val>
-        find(u32 index) const;
-
-        /**
-         *
-         */
-        Item_Ref<Val>
-        find(u32 index);
-
-        /**
          * Ordered insert.
          */
         bool
@@ -120,9 +132,21 @@ namespace scent
          */
         bool
         pull(u32 index);
+
+        /**
+         *
+         */
+        Item_Ref<const Val>
+        operator[](u32 index) const;
+
+        /**
+         *
+         */
+        Item_Ref<Val>
+        operator[](u32 index);
     };
 } // scent
 
-#include "arr_list.inl"
+#include "array_list.inl"
 
-#endif // SCENT_ARR_LIST_HPP
+#endif // SCENT_ARRAY_LIST_HPP

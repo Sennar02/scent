@@ -33,6 +33,18 @@ namespace scent
         /**
          *
          */
+        void
+        init(Key& key, Val& val);
+
+        /**
+         *
+         */
+        void
+        drop();
+
+        /**
+         *
+         */
         bool
         exists() const;
 

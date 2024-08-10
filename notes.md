@@ -8,11 +8,17 @@ Per gli allocatori come quello a pool, meglio assegnare indirizzi allineati ad `
 
 Nomi per le strutture dati:
 
-- List (Arr_List)
+- List (Array_List)
 - Stack
 - Queue
-- Map (Hash_Map)
+- Map (Array_Map)
 - Set
 - Bag
 - Tree
 - Graph
+
+Cose da fare:
+
+- [ ] Implementare Page_Alloc
+- [ ] Inventarsi un modo per implementare Paged_List
+- [ ] E poi implementare Paged_Map

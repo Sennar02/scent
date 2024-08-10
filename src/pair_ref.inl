@@ -8,8 +8,23 @@ namespace scent
     template <class Key, class Val>
     Pair_Ref<Key, Val>::Pair_Ref(Key& key, Val& val)
     {
+        init(key, val);
+    }
+
+    template <class Key, class Val>
+    void
+    Pair_Ref<Key, Val>::init(Key& key, Val& val)
+    {
         _key = &key;
         _val = &val;
+    }
+
+    template <class Key, class Val>
+    void
+    Pair_Ref<Key, Val>::drop()
+    {
+        _key = 0;
+        _val = 0;
     }
 
     template <class Key, class Val>

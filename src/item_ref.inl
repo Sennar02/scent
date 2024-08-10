@@ -8,7 +8,21 @@ namespace scent
     template <class Val>
     Item_Ref<Val>::Item_Ref(Val& val)
     {
+        init(val);
+    }
+
+    template <class Val>
+    void
+    Item_Ref<Val>::init(Val& val)
+    {
         _val = &val;
+    }
+
+    template <class Val>
+    void
+    Item_Ref<Val>::drop()
+    {
+        _val = 0;
     }
 
     template <class Val>

@@ -22,8 +22,14 @@ namespace scent
         /**
          *
          */
+        virtual void
+        reset() = 0;
+
+        /**
+         *
+         */
         virtual i8*
-        reserve(u32 items, u32 bytes, u8 align) = 0;
+        reserve(u32 numb, u32 unit, u8 align) = 0;
 
         /**
          *
@@ -37,7 +43,7 @@ namespace scent
      */
     template <class Val>
     Val*
-    reserve(Alloc& alloc, u32 items);
+    reserve(Alloc& alloc, u32 numb);
 
     /**
      *

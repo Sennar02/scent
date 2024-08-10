@@ -2,6 +2,10 @@
 
 namespace scent
 {
+    void
+    Empty_Alloc::reset()
+    {}
+
     i8*
     Empty_Alloc::reserve(u32, u32, u8)
     {

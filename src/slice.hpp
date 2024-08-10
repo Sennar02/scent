@@ -1,23 +1,20 @@
-#ifndef SCENT_ARENA_ALLOC_HPP
-#define SCENT_ARENA_ALLOC_HPP
+#ifndef SCENT_SLICE_HPP
+#define SCENT_SLICE_HPP
 
-#include "alloc.hpp"
+#include <assert.h>
+
+#include "types.hpp"
 
 namespace scent
 {
-    struct Arena_Alloc final
-        : public Alloc
+    template <class Val>
+    struct Slice
     {
     private:
         /**
          *
          */
-        i8* _base = 0;
-
-        /**
-         *
-         */
-        i8* _next = 0;
+        Val* _pntr = 0;
 
         /**
          *
@@ -28,18 +25,18 @@ namespace scent
         /**
          *
          */
-        Arena_Alloc();
+        Slice();
 
         /**
          *
          */
-        Arena_Alloc(u32 size);
+        Slice(Val* pntr, u32 size);
 
         /**
          *
          */
         void
-        init(u32 size);
+        init(Val* pntr, u32 size);
 
         /**
          *
@@ -50,21 +47,23 @@ namespace scent
         /**
          *
          */
-        void
-        reset();
+        u32
+        size() const;
 
         /**
          *
          */
-        i8*
-        reserve(u32 numb, u32 unit, u8 align);
+        const Val&
+        operator[](u32 index) const;
 
         /**
          *
          */
-        i8*
-        release(i8* pntr);
+        Val&
+        operator[](u32 index);
     };
 } // scent
 
-#endif // SCENT_ARENA_ALLOC_HPP
+#include "slice.inl"
+
+#endif // SCENT_SLICE_HPP

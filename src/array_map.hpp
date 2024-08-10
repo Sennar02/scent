@@ -1,8 +1,9 @@
-#ifndef SCENT_HASH_MAP_HPP
-#define SCENT_HASH_MAP_HPP
+#ifndef SCENT_ARRAY_MAP_HPP
+#define SCENT_ARRAY_MAP_HPP
 
 #include "types.hpp"
 #include "utils.hpp"
+#include "slice.hpp"
 #include "alloc.hpp"
 #include "hash.hpp"
 #include "pair_ref.hpp"
@@ -10,42 +11,33 @@
 namespace scent
 {
     template <class Key, class Val, class Hash>
-    struct Hash_Map final
+    struct Array_Map final
     {
-    private:
-        struct Ctrl {
-            /**
-             *
-             */
-            Key key;
-
-            /**
-             *
-             */
-            u32 dist;
-
-            /**
-             *
-             */
-            u32 hash;
-        };
-
-        struct Body {
-            /**
-             *
-             */
-            Val val;
-        };
+    public:
+        /**
+         *
+         */
+        Alloc* _alloc = 0;
 
         /**
          *
          */
-        Ctrl* _ctrl = 0;
+        u32* _indx = 0;
 
         /**
          *
          */
-        Body* _body = 0;
+        u32* _hash = 0;
+
+        /**
+         *
+         */
+        Key* _head = 0;
+
+        /**
+         *
+         */
+        Val* _body = 0;
 
         /**
          *
@@ -61,24 +53,30 @@ namespace scent
         /**
          *
          */
-        Hash_Map();
+        Array_Map();
 
         /**
          *
          */
-        Hash_Map(Alloc& alloc, u32 size);
-
-        /**
-         *
-         */
-        void
-        drop(Alloc& alloc);
+        Array_Map(Alloc& alloc, u32 size);
 
         /**
          *
          */
         void
-        clear();
+        init(Alloc& alloc, u32 size);
+
+        /**
+         *
+         */
+        void
+        drop();
+
+        /**
+         *
+         */
+        void
+        reset();
 
         /**
          *
@@ -90,7 +88,25 @@ namespace scent
          *
          */
         u32
+        count() const;
+
+        /**
+         *
+         */
+        Slice<const Key>
+        keys() const;
+
+        /**
+         *
+         */
+        Slice<const Val>
         values() const;
+
+        /**
+         *
+         */
+        Slice<Val>
+        values();
 
         /**
          *
@@ -119,18 +135,6 @@ namespace scent
         /**
          *
          */
-        Pair_Ref<const Key, const Val>
-        find(const Key& key) const;
-
-        /**
-         *
-         */
-        Pair_Ref<const Key, Val>
-        find(const Key& key);
-
-        /**
-         *
-         */
         bool
         insert(const Key& key, const Val& val);
 
@@ -138,10 +142,28 @@ namespace scent
          *
          */
         bool
+        update(const Key& key, const Val& val);
+
+        /**
+         *
+         */
+        bool
         remove(const Key& key);
+
+        /**
+         *
+         */
+        Pair_Ref<const Key, const Val>
+        operator[](const Key& key) const;
+
+        /**
+         *
+         */
+        Pair_Ref<const Key, Val>
+        operator[](const Key& key);
     };
 } // scent
 
-#include "hash_map.inl"
+#include "array_map.inl"
 
-#endif // SCENT_HASH_MAP_HPP
+#endif // SCENT_ARRAY_MAP_HPP

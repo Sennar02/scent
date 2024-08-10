@@ -4,9 +4,9 @@ namespace scent
 {
     template <class Val>
     Val*
-    reserve(Alloc& alloc, u32 items)
+    reserve(Alloc& alloc, u32 numb)
     {
-        void* pntr = alloc.reserve(items,
+        void* pntr = alloc.reserve(numb,
             sizeof(Val), alignof(Val)
         );
 

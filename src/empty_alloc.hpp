@@ -11,6 +11,12 @@ namespace scent
         /**
          *
          */
+        void
+        reset();
+
+        /**
+         *
+         */
         i8*
         reserve(u32 items, u32 bytes, u8 align);
 
