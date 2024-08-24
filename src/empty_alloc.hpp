@@ -11,6 +11,12 @@ namespace scent
         /**
          *
          */
+        u32
+        next(u8 align) const;
+
+        /**
+         *
+         */
         void
         reset();
 
@@ -18,12 +24,18 @@ namespace scent
          *
          */
         i8*
-        reserve(u32 items, u32 bytes, u8 align);
+        acquire(i8* pntr, u32 size, u8 align);
 
         /**
          *
          */
         i8*
+        resize(i8* pntr, u32 size);
+
+        /**
+         *
+         */
+        void
         release(i8* pntr);
     };
 } // scent

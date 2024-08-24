@@ -1,101 +1,35 @@
 #include <stdio.h>
+#include <malloc.h>
 
-#include "empty_alloc.hpp"
 #include "arena_alloc.hpp"
-#include "array_map.hpp"
+#include "array_list.hpp"
 
 using namespace scent;
 
 int
 main()
 {
-    Arena_Alloc arena = {1024};
+    Arena_Alloc alloc1 = {malloc(64), 64};
+    Arena_Alloc alloc2 = {malloc(1024), 1024};
 
-    Array_Map<u32, i8> map = {arena, 5};
+    Array_List<const char*> names = {alloc1, 2};
 
-    map.insert(4, 'e');
-    map.insert(0, 'a');
-    map.insert(2, 'c');
+    names.insert(0, "giovanni");
+    names.insert(1, "mattia");
 
-    auto k = map.keys();
-    auto v = map.values();
+    printf("names  = %p\n", (void*) names._pntr);
+    printf("alloc1 = %u\n", alloc1.next(1));
+    printf("alloc2 = %u\n", alloc2.next(1));
 
-    for ( u32 i = 0; i < k.size(); i += 1 )
-        printf("| %2u | %2c |\n", k[i], v[i]);
-    printf("\n");
+    for ( u32 i = 0; i < names._size; i += 1 )
+        printf("%3u. '%s'\n", i, names._pntr[i]);
 
-    for ( u32 i = 0; i < map._size; i += 1 ) {
-        if ( map._indx[i] != 0 )
-            printf("| %2u | ", map._indx[i]);
-        else
-            printf("| %2c | ", ' ');
+    printf("resize = %u\n", names.resize(alloc2, 10));
 
-        if ( i < map._count )
-            printf("%2u | %2u | %2c |\n",
-                map._hash[i], map._head[i], map._body[i]);
-        else
-            printf("%2c | %2c | %2c |\n",
-                ' ', ' ', ' ');
-    }
-    printf("\n");
+    printf("names  = %p\n", (void*) names._pntr);
+    printf("alloc1 = %u\n", alloc1.next(1));
+    printf("alloc2 = %u\n", alloc2.next(1));
 
-    map.remove(4);
-
-    for ( u32 i = 0; i < map._size; i += 1 ) {
-        if ( map._indx[i] != 0 )
-            printf("| %2u | ", map._indx[i]);
-        else
-            printf("| %2c | ", ' ');
-
-        if ( i < map._count )
-            printf("%2u | %2u | %2c |\n",
-                map._hash[i], map._head[i], map._body[i]);
-        else
-            printf("%2c | %2c | %2c |\n",
-                ' ', ' ', ' ');
-    }
-    printf("\n");
-
-    map.remove(2);
-
-    for ( u32 i = 0; i < map._size; i += 1 ) {
-        if ( map._indx[i] != 0 )
-            printf("| %2u | ", map._indx[i]);
-        else
-            printf("| %2c | ", ' ');
-
-        if ( i < map._count )
-            printf("%2u | %2u | %2c |\n",
-                map._hash[i], map._head[i], map._body[i]);
-        else
-            printf("%2c | %2c | %2c |\n",
-                ' ', ' ', ' ');
-    }
-    printf("\n");
-
-    map.remove(0);
-
-    for ( u32 i = 0; i < map._size; i += 1 ) {
-        if ( map._indx[i] != 0 )
-            printf("| %2u | ", map._indx[i]);
-        else
-            printf("| %2c | ", ' ');
-
-        if ( i < map._count )
-            printf("%2u | %2u | %2c |\n",
-                map._hash[i], map._head[i], map._body[i]);
-        else
-            printf("%2c | %2c | %2c |\n",
-                ' ', ' ', ' ');
-    }
-
-    map.drop();
-
-    k = map.keys();
-    v = map.values();
-
-    printf("\n");
-
-    for ( u32 i = 0; i < k.size(); i += 1 )
-        printf("| %2u | %2c |\n", k[i], v[i]);
+    for ( u32 i = 0; i < names._size; i += 1 )
+        printf("%3u. '%s'\n", i, names._pntr[i]);
 }

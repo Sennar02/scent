@@ -12,44 +12,90 @@ namespace scent
     using u16  = uint16_t;
     using u8   = uint8_t;
 
+    static const u32 BYTES_ARCH = sizeof(size_t);
+    static const u8  ALIGN_ARCH = alignof(size_t);
+
+    static const u8 ALIGN_MAX = 16;
+    static const u8 ALIGN_MIN = 1;
+
+    static const u32 BYTES_UPTR = sizeof(uptr);
+    static const u32 BYTES_U64  = sizeof(u64);
+    static const u32 BYTES_U32  = sizeof(u32);
+    static const u32 BYTES_U16  = sizeof(u16);
+    static const u32 BYTES_U8   = sizeof(u8);
+
+    static_assert(BYTES_UPTR == BYTES_ARCH, "Unsupported");
+    static_assert(BYTES_U64  ==          8, "Unsupported");
+    static_assert(BYTES_U32  ==          4, "Unsupported");
+    static_assert(BYTES_U16  ==          2, "Unsupported");
+    static_assert(BYTES_U8   ==          1, "Unsupported");
+
+    static const u8 ALIGN_UPTR = alignof(uptr);
+    static const u8 ALIGN_U64  = alignof(u64);
+    static const u8 ALIGN_U32  = alignof(u32);
+    static const u8 ALIGN_U16  = alignof(u16);
+    static const u8 ALIGN_U8   = alignof(u8);
+
+    static_assert(ALIGN_UPTR == ALIGN_ARCH, "Unsupported");
+    static_assert(ALIGN_U64  ==          8, "Unsupported");
+    static_assert(ALIGN_U32  ==          4, "Unsupported");
+    static_assert(ALIGN_U16  ==          2, "Unsupported");
+    static_assert(ALIGN_U8   ==          1, "Unsupported");
+
     using iptr = intptr_t;
     using i64  = int64_t;
     using i32  = int32_t;
     using i16  = int16_t;
     using i8   = char;
 
+    static const u32 BYTES_IPTR = sizeof(iptr);
+    static const u32 BYTES_I64  = sizeof(i64);
+    static const u32 BYTES_I32  = sizeof(i32);
+    static const u32 BYTES_I16  = sizeof(i16);
+    static const u32 BYTES_I8   = sizeof(i8);
+
+    static_assert(BYTES_IPTR == BYTES_ARCH, "Unsupported");
+    static_assert(BYTES_I64  ==          8, "Unsupported");
+    static_assert(BYTES_I32  ==          4, "Unsupported");
+    static_assert(BYTES_I16  ==          2, "Unsupported");
+    static_assert(BYTES_I8   ==          1, "Unsupported");
+
+    static const u8 ALIGN_IPTR = alignof(iptr);
+    static const u8 ALIGN_I64  = alignof(i64);
+    static const u8 ALIGN_I32  = alignof(i32);
+    static const u8 ALIGN_I16  = alignof(i16);
+    static const u8 ALIGN_I8   = alignof(i8);
+
+    static_assert(ALIGN_IPTR == ALIGN_ARCH, "Unsupported");
+    static_assert(ALIGN_I64  ==          8, "Unsupported");
+    static_assert(ALIGN_I32  ==          4, "Unsupported");
+    static_assert(ALIGN_I16  ==          2, "Unsupported");
+    static_assert(ALIGN_I8   ==          1, "Unsupported");
+
     using f64 = double;
     using f32 = float;
 
-    static_assert(alignof(uptr) == alignof(size_t), "Unsupported");
-    static_assert(alignof(u64)  ==               8, "Unsupported");
-    static_assert(alignof(u32)  ==               4, "Unsupported");
-    static_assert(alignof(u16)  ==               2, "Unsupported");
-    static_assert(alignof(u8)   ==               1, "Unsupported");
+    static const u32 BYTES_F64 = sizeof(f64);
+    static const u32 BYTES_F32 = sizeof(f32);
 
-    static_assert(sizeof(uptr) == sizeof(size_t), "Unsupported");
-    static_assert(sizeof(u64)  ==              8, "Unsupported");
-    static_assert(sizeof(u32)  ==              4, "Unsupported");
-    static_assert(sizeof(u16)  ==              2, "Unsupported");
-    static_assert(sizeof(u8)   ==              1, "Unsupported");
+    static_assert(BYTES_F64 == 8, "Unsupported");
+    static_assert(BYTES_F32 == 4, "Unsupported");
 
-    static_assert(alignof(iptr) == alignof(size_t), "Unsupported");
-    static_assert(alignof(i64)  ==               8, "Unsupported");
-    static_assert(alignof(i32)  ==               4, "Unsupported");
-    static_assert(alignof(i16)  ==               2, "Unsupported");
-    static_assert(alignof(i8)   ==               1, "Unsupported");
+    static const u8 ALIGN_F64 = alignof(f64);
+    static const u8 ALIGN_F32 = alignof(f32);
 
-    static_assert(sizeof(iptr) == sizeof(size_t), "Unsupported");
-    static_assert(sizeof(i64)  ==              8, "Unsupported");
-    static_assert(sizeof(i32)  ==              4, "Unsupported");
-    static_assert(sizeof(i16)  ==              2, "Unsupported");
-    static_assert(sizeof(i8)   ==              1, "Unsupported");
+    static_assert(ALIGN_F64 == 8, "Unsupported");
+    static_assert(ALIGN_F32 == 4, "Unsupported");
 
-    static_assert(alignof(f64) == 8, "Unsupported");
-    static_assert(alignof(f32) == 4, "Unsupported");
+    struct Alloc;
+    struct Empty_Alloc;
+    struct Arena_Alloc;
 
-    static_assert(sizeof(f64) == 8, "Unsupported");
-    static_assert(sizeof(f32) == 4, "Unsupported");
+    template <class Val>
+    struct Item_Ref;
+
+    template <class Key, class Val>
+    struct Pair_Ref;
 
     template <class Val>
     struct Slice;
@@ -58,28 +104,17 @@ namespace scent
     struct Hash;
 
     /**
-     * Non cresce.
+     * Cresce allargando il puntatore o copiando gli elementi.
      */
     template <class Val>
     struct Array_List;
 
     /**
-     * Cresce tramite paginazione.
-     */
-    template <class Val>
-    struct Paged_List;
-
-    /**
-     * Non cresce e non gestisce collisioni.
+     * Cresce ricalcolando tutti gli hash. Gestisce le collisioni
+     * con la tecnica Robin Hood.
      */
     template <class Key, class Val, class Hash = Hash<Key>>
-    struct Array_Map;
-
-    /**
-     * Cresce tramite paginazione e gestisce le collisioni in questo modo.
-     */
-    template <class Key, class Val, class Hash = Hash<Key>>
-    struct Paged_Map;
+    struct Robin_Map;
 } // scent
 
 #endif // SCENT_TYPES_HPP

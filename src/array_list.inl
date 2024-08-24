@@ -15,20 +15,20 @@ namespace scent
     void
     Array_List<Val>::init(Alloc& alloc, u32 size)
     {
-        _alloc = &alloc;
-        _pntr  = reserve<Val>(*_alloc, size);
+        _pntr = typed_acquire<Val>(&alloc, 0, size);
 
-        if ( _pntr == 0 )
-            _alloc = 0;
-        else
+        if ( _pntr != 0 ) {
+            _alloc = &alloc;
             _size  = size;
+            _count = 0;
+        }
     }
 
     template <class Val>
     void
     Array_List<Val>::drop()
     {
-        release(*_alloc, _pntr);
+        typed_release(_alloc, _pntr);
 
         _alloc = 0;
         _pntr  = 0;
@@ -97,6 +97,43 @@ namespace scent
     Array_List<Val>::isnt_full() const
     {
         return _count != _size;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::resize(u32 size)
+    {
+        if ( _count > size ) return false;
+
+        Val* pntr = typed_resize(_alloc, _pntr, size);
+
+        if ( pntr == 0 ) return false;
+
+        _size = size;
+
+        return true;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::resize(Alloc& alloc, u32 size)
+    {
+        if ( _count > size ) return false;
+
+        Val* pntr = typed_acquire<Val>(&alloc, 0, size);
+
+        if ( pntr == 0 ) return false;
+
+        for ( u32 i = 0; i < _count; i += 1 )
+            pntr[i] = _pntr[i];
+
+        typed_release(_alloc, _pntr);
+
+        _alloc = &alloc;
+        _pntr  = pntr;
+        _size  = size;
+
+        return true;
     }
 
     template <class Val>

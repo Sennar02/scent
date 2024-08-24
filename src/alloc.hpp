@@ -8,17 +8,29 @@ namespace scent
     /**
      *
      */
-    i8*
-    next_aligned(i8* memory, u8 align);
+    bool
+    is_pow_2(u32 value);
 
     /**
      *
      */
     i8*
-    null_if(i8* memory, bool state);
+    next_aligned(void* memory, u8 align);
+
+    /**
+     *
+     */
+    i8*
+    null_if(void* memory, bool state);
 
     struct Alloc
     {
+        /**
+         *
+         */
+        virtual u32
+        next(u8 align) const = 0;
+
         /**
          *
          */
@@ -29,12 +41,18 @@ namespace scent
          *
          */
         virtual i8*
-        reserve(u32 numb, u32 unit, u8 align) = 0;
+        acquire(i8* pntr, u32 size, u8 align) = 0;
 
         /**
          *
          */
         virtual i8*
+        resize(i8* pntr, u32 size) = 0;
+
+        /**
+         *
+         */
+        virtual void
         release(i8* pntr) = 0;
     };
 
@@ -43,14 +61,21 @@ namespace scent
      */
     template <class Val>
     Val*
-    reserve(Alloc& alloc, u32 numb);
+    typed_acquire(Alloc* alloc, Val* pntr, u32 size);
 
     /**
      *
      */
     template <class Val>
     Val*
-    release(Alloc& alloc, Val* pntr);
+    typed_resize(Alloc* alloc, Val* pntr, u32 size);
+
+    /**
+     *
+     */
+    template <class Val>
+    void
+    typed_release(Alloc* alloc, Val* pntr);
 } // scent
 
 #include "alloc.inl"

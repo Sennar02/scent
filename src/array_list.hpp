@@ -11,7 +11,9 @@ namespace scent
     template <class Val>
     struct Array_List final
     {
-    private:
+    // TODO(gio): rendi privato.
+    // private:
+    public:
         /**
          *
          */
@@ -108,6 +110,18 @@ namespace scent
          */
         bool
         isnt_full() const;
+
+        /**
+         *
+         */
+        bool
+        resize(u32 size);
+
+        /**
+         *
+         */
+        bool
+        resize(Alloc& alloc, u32 size);
 
         /**
          * Ordered insert.

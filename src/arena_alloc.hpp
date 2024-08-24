@@ -12,7 +12,12 @@ namespace scent
         /**
          *
          */
-        i8* _base = 0;
+        i8* _pntr = 0;
+
+        /**
+         *
+         */
+        i8* _last = 0;
 
         /**
          *
@@ -33,19 +38,31 @@ namespace scent
         /**
          *
          */
-        Arena_Alloc(u32 size);
+        Arena_Alloc(void* pntr, u32 size);
 
         /**
          *
          */
         void
-        init(u32 size);
+        init(void* pntr, u32 size);
 
         /**
          *
          */
         void
         drop();
+
+        /**
+         *
+         */
+        u32
+        size() const;
+
+        /**
+         *
+         */
+        u32
+        next(u8 align) const;
 
         /**
          *
@@ -57,12 +74,18 @@ namespace scent
          *
          */
         i8*
-        reserve(u32 numb, u32 unit, u8 align);
+        acquire(i8* pntr, u32 size, u8 align);
 
         /**
          *
          */
         i8*
+        resize(i8* pntr, u32 size);
+
+        /**
+         *
+         */
+        void
         release(i8* pntr);
     };
 } // scent
