@@ -15,7 +15,7 @@ namespace scent
     void
     Array_List<Val>::init(Alloc& alloc, u32 size)
     {
-        if ( _pntr != 0 ) drop();
+        if ( _size != 0 ) drop();
 
         _alloc = &alloc;
         _pntr  = alloc_acquire<Val>(_alloc, size);

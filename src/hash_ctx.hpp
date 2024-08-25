@@ -1,27 +1,27 @@
-#ifndef SCENT_HASH_HPP
-#define SCENT_HASH_HPP
+#ifndef SCENT_HASH_CTX_HPP
+#define SCENT_HASH_CTX_HPP
 
 #include "types.hpp"
 
 namespace scent
 {
     template <class Key>
-    struct Hash final
+    struct Hash_Ctx final
     {
         /**
          *
          */
         static u32
-        get(const Key& key);
+        hash(const Key& key);
 
         /**
          *
          */
         static bool
-        eql(const Key& k1, const Key& k2);
+        equals(const Key& k1, const Key& k2);
     };
 } // namespace scent
 
-#include "hash.inl"
+#include "hash_ctx.inl"
 
-#endif // SCENT_HASH_HPP
+#endif // SCENT_HASH_CTX_HPP

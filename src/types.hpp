@@ -101,7 +101,7 @@ namespace scent
     struct Slice;
 
     template <class Key>
-    struct Hash;
+    struct Hash_Ctx;
 
     /**
      * Cresce allargando il puntatore o copiando gli elementi.
@@ -113,7 +113,7 @@ namespace scent
      * Cresce ricalcolando tutti gli hash. Gestisce le collisioni
      * con la tecnica Robin Hood.
      */
-    template <class Key, class Val, class Hash = Hash<Key>>
+    template <class Key, class Val, class Ctx = Hash_Ctx<Key>>
     struct Robin_Map;
 } // scent
 
