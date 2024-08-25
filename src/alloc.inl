@@ -4,21 +4,21 @@ namespace scent
 {
     template <class Val>
     Val*
-    typed_acquire(Alloc* alloc, Val* pntr, u32 size)
+    alloc_acquire(Alloc* alloc, u32 size)
     {
         u32 bytes = sizeof(Val) * size;
         u8  align = alignof(Val);
 
-        if ( alloc == 0 ) return pntr;
+        if ( alloc == 0 ) return 0;
 
         return (Val*) alloc->acquire(
-            (i8*) pntr, bytes, align
+            bytes, align
         );
     }
 
     template <class Val>
     Val*
-    typed_resize(Alloc* alloc, Val* pntr, u32 size)
+    alloc_resize(Alloc* alloc, void* pntr, u32 size)
     {
         u32 bytes = sizeof(Val) * size;
 
@@ -31,7 +31,7 @@ namespace scent
 
     template <class Val>
     void
-    typed_release(Alloc* alloc, Val* pntr)
+    alloc_release(Alloc* alloc, void* pntr)
     {
         if ( alloc != 0 )
             alloc->release((i8*) pntr);

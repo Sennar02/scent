@@ -13,7 +13,7 @@ namespace scent
     {}
 
     i8*
-    Empty_Alloc::acquire(i8*, u32, u8)
+    Empty_Alloc::acquire(u32, u8)
     {
         return 0;
     }

@@ -24,7 +24,7 @@ namespace scent
          *
          */
         i8*
-        acquire(i8* pntr, u32 size, u8 align);
+        acquire(u32 size, u8 align);
 
         /**
          *

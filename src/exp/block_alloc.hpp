@@ -1,14 +1,14 @@
-#ifndef SCENT_ARENA_ALLOC_HPP
-#define SCENT_ARENA_ALLOC_HPP
+#ifndef SCENT_BLOCK_ALLOC_HPP
+#define SCENT_BLOCK_ALLOC_HPP
 
 #include "alloc.hpp"
 
 namespace scent
 {
-    struct Arena_Alloc final
+    struct Block_Alloc final
         : public Alloc
     {
-    private:
+    public:
         /**
          *
          */
@@ -17,34 +17,44 @@ namespace scent
         /**
          *
          */
-        i8* _last = 0;
-
-        /**
-         *
-         */
-        i8* _next = 0;
+        void** _list = 0;
 
         /**
          *
          */
         u32 _size = 0;
 
-    public:
         /**
          *
          */
-        Arena_Alloc();
+        u32 _unit = 0;
 
         /**
          *
          */
-        Arena_Alloc(void* pntr, u32 size);
+        u32 _fill = 0;
+
+        /**
+         *
+         */
+        u32 _count = 0;
+
+    public:
+        /**
+         *
+         */
+        Block_Alloc();
+
+        /**
+         *
+         */
+        Block_Alloc(void* pntr, u32 size, u32 unit, u8 align);
 
         /**
          *
          */
         void
-        init(void* pntr, u32 size);
+        init(void* pntr, u32 size, u32 unit, u8 align);
 
         /**
          *
@@ -74,13 +84,7 @@ namespace scent
          *
          */
         i8*
-        acquire(u32 size, u8 align);
-
-        /**
-         *
-         */
-        i8*
-        resize(i8* pntr, u32 size);
+        reserve(u32 size, u8 align = 1);
 
         /**
          *
@@ -90,4 +94,4 @@ namespace scent
     };
 } // scent
 
-#endif // SCENT_ARENA_ALLOC_HPP
+#endif // SCENT_BLOCK_ALLOC_HPP

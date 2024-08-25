@@ -41,7 +41,7 @@ namespace scent
          *
          */
         virtual i8*
-        acquire(i8* pntr, u32 size, u8 align) = 0;
+        acquire(u32 size, u8 align) = 0;
 
         /**
          *
@@ -61,21 +61,21 @@ namespace scent
      */
     template <class Val>
     Val*
-    typed_acquire(Alloc* alloc, Val* pntr, u32 size);
+    alloc_acquire(Alloc* alloc, u32 size);
 
     /**
      *
      */
     template <class Val>
     Val*
-    typed_resize(Alloc* alloc, Val* pntr, u32 size);
+    alloc_resize(Alloc* alloc, void* pntr, u32 size);
 
     /**
      *
      */
     template <class Val>
     void
-    typed_release(Alloc* alloc, Val* pntr);
+    alloc_release(Alloc* alloc, void* pntr);
 } // scent
 
 #include "alloc.inl"

@@ -7,10 +7,10 @@ namespace scent
     bool
     is_pow_2(u32 value)
     {
-        u32 diff =
-            (value & (value - 1));
+        u32 error = (value & (value - 1));
 
-        return value != 0 && diff == 0;
+        return value != 0 &&
+               error == 0;
     }
 
     i8*
@@ -18,20 +18,21 @@ namespace scent
     {
         assert(is_pow_2(align) != 0 && "Alignment is not a power of two");
 
-        uptr pntr = (uptr) memory;
-        uptr diff = pntr & (align - 1);
+        uptr value = (uptr) memory;
+        uptr error = value & (align - 1);
 
-        diff = (diff != 0) * (align - diff);
+        error = (error != 0) * (align - error);
 
-        return (i8*) (pntr + diff);
+        return (i8*) (value + error);
     }
 
     i8*
     null_if(void* memory, bool state)
     {
-        uptr pntr = (uptr) memory;
-        uptr fact = !state;
+        uptr value = (uptr) memory;
 
-        return (i8*) (pntr * fact);
+        return (i8*) (
+            (state == 0) * value
+        );
     }
 } // scent

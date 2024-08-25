@@ -1,17 +1,19 @@
-#ifndef SCENT_ARRAY_LIST_HPP
-#define SCENT_ARRAY_LIST_HPP
+#ifndef SCENT_ARRAY_MAP_HPP
+#define SCENT_ARRAY_MAP_HPP
 
 #include "types.hpp"
+#include "utils.hpp"
 #include "slice.hpp"
 #include "alloc.hpp"
-#include "item_ref.hpp"
+#include "hash.hpp"
+#include "pair_ref.hpp"
 
 namespace scent
 {
-    template <class Val>
-    struct Array_List final
+    template <class Key, class Val, class Hash>
+    struct Array_Map final
     {
-    private:
+    public:
         /**
          *
          */
@@ -20,7 +22,22 @@ namespace scent
         /**
          *
          */
-        Val* _pntr = 0;
+        u32* _indx = 0;
+
+        /**
+         *
+         */
+        u32* _hash = 0;
+
+        /**
+         *
+         */
+        Key* _head = 0;
+
+        /**
+         *
+         */
+        Val* _body = 0;
 
         /**
          *
@@ -36,18 +53,18 @@ namespace scent
         /**
          *
          */
-        Array_List();
+        Array_Map();
 
         /**
          *
          */
-        Array_List(Alloc& alloc, u32 size = 0);
+        Array_Map(Alloc& alloc, u32 size);
 
         /**
          *
          */
         void
-        init(Alloc& alloc, u32 size = 0);
+        init(Alloc& alloc, u32 size);
 
         /**
          *
@@ -72,6 +89,12 @@ namespace scent
          */
         u32
         count() const;
+
+        /**
+         *
+         */
+        Slice<const Key>
+        keys() const;
 
         /**
          *
@@ -113,52 +136,34 @@ namespace scent
          *
          */
         bool
-        resize(u32 size);
+        insert(const Key& key, const Val& val);
 
         /**
          *
          */
         bool
-        resize(Alloc& alloc, u32 size);
-
-        /**
-         * Ordered insert.
-         */
-        bool
-        insert(u32 index, const Val& val);
-
-        /**
-         * Swapping insert.
-         */
-        bool
-        push(u32 index, const Val& val);
-
-        /**
-         * Ordered remove.
-         */
-        bool
-        remove(u32 index);
-
-        /**
-         * Swapping remove.
-         */
-        bool
-        pull(u32 index);
+        update(const Key& key, const Val& val);
 
         /**
          *
          */
-        Item_Ref<const Val>
-        operator[](u32 index) const;
+        bool
+        remove(const Key& key);
 
         /**
          *
          */
-        Item_Ref<Val>
-        operator[](u32 index);
+        Pair_Ref<const Key, const Val>
+        operator[](const Key& key) const;
+
+        /**
+         *
+         */
+        Pair_Ref<const Key, Val>
+        operator[](const Key& key);
     };
 } // scent
 
-#include "array_list.inl"
+#include "array_map.inl"
 
-#endif // SCENT_ARRAY_LIST_HPP
+#endif // SCENT_ARRAY_MAP_HPP

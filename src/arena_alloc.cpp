@@ -14,10 +14,11 @@ namespace scent
     void
     Arena_Alloc::init(void* pntr, u32 size)
     {
+        if ( _pntr != 0 ) drop();
+
         _pntr = (i8*) pntr;
 
         if ( _pntr != 0 ) {
-            _last = 0;
             _next = _pntr;
             _size = size;
 
@@ -59,9 +60,10 @@ namespace scent
     }
 
     i8*
-    Arena_Alloc::acquire(i8* pntr, u32 size, u8 align)
+    Arena_Alloc::acquire(u32 size, u8 align)
     {
         i8* next = next_aligned(_next, align);
+        i8* pntr = 0;
 
         if ( size == 0 ) return pntr;
 

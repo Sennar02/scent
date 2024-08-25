@@ -15,20 +15,20 @@ namespace scent
     void
     Array_List<Val>::init(Alloc& alloc, u32 size)
     {
-        _pntr = typed_acquire<Val>(&alloc, 0, size);
+        if ( _pntr != 0 ) drop();
 
-        if ( _pntr != 0 ) {
-            _alloc = &alloc;
-            _size  = size;
-            _count = 0;
-        }
+        _alloc = &alloc;
+        _pntr  = alloc_acquire<Val>(_alloc, size);
+
+        if ( _pntr != 0 )
+            _size = size;
     }
 
     template <class Val>
     void
     Array_List<Val>::drop()
     {
-        typed_release(_alloc, _pntr);
+        alloc_release<Val>(_alloc, _pntr);
 
         _alloc = 0;
         _pntr  = 0;
@@ -105,10 +105,15 @@ namespace scent
     {
         if ( _count > size ) return false;
 
-        Val* pntr = typed_resize(_alloc, _pntr, size);
+        Val* pntr = alloc_resize<Val>(_alloc, _pntr, size);
 
-        if ( pntr == 0 ) return false;
+        if ( _pntr != pntr || pntr == 0 )
+            pntr = alloc_acquire<Val>(_alloc, size);
 
+        if ( size != 0 && pntr == 0 )
+            return false;
+
+        _pntr = pntr;
         _size = size;
 
         return true;
@@ -120,14 +125,14 @@ namespace scent
     {
         if ( _count > size ) return false;
 
-        Val* pntr = typed_acquire<Val>(&alloc, 0, size);
+        Val* pntr = alloc_acquire<Val>(&alloc, size);
 
         if ( pntr == 0 ) return false;
 
         for ( u32 i = 0; i < _count; i += 1 )
             pntr[i] = _pntr[i];
 
-        typed_release(_alloc, _pntr);
+        alloc_release<Val>(_alloc, _pntr);
 
         _alloc = &alloc;
         _pntr  = pntr;
@@ -140,6 +145,9 @@ namespace scent
     bool
     Array_List<Val>::insert(u32 index, const Val& val)
     {
+        if ( _count == _size )
+            resize(_size + _size / 2 + 1);
+
         if ( _count == _size ) return false;
         if ( _count <  index ) return false;
 
@@ -156,6 +164,9 @@ namespace scent
     bool
     Array_List<Val>::push(u32 index, const Val& val)
     {
+        if ( _count == _size )
+            resize(_size + _size / 2 + 1);
+
         if ( _count == _size ) return false;
         if ( _count <  index ) return false;
 
