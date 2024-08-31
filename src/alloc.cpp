@@ -7,7 +7,7 @@ namespace scent
     bool
     is_pow_2(u32 value)
     {
-        u32 error = (value & (value - 1));
+        u32 error = (value & (value - 1u));
 
         return value != 0 &&
                error == 0;
@@ -19,7 +19,7 @@ namespace scent
         assert(is_pow_2(align) != 0 && "Alignment is not a power of two");
 
         uptr value = (uptr) memory;
-        uptr error = value & (align - 1);
+        uptr error = value & (align - 1u);
 
         error = (error != 0) * (align - error);
 

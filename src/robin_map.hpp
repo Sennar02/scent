@@ -174,6 +174,12 @@ namespace scent
          *
          */
         bool
+        update(const Key& key, const Val& val);
+
+        /**
+         *
+         */
+        bool
         remove(const Key& key);
 
         /**

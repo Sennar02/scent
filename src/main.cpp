@@ -10,66 +10,30 @@ using namespace scent;
 int
 main()
 {
-    Arena_Alloc alloc = {malloc(1024), 1024};
+    u32   size = 1024u;
+    void* pntr = malloc(size);
 
-    Robin_Map<u32, const char*> names = {alloc, 10};
+    Arena_Alloc arena = {pntr, size};
 
-    printf("insert = %u\n", names.insert(7, "a"));
-    printf("insert = %u\n", names.insert(6, "b"));
-    printf("insert = %u\n", names.insert(5, "c"));
+    Robin_Map<i8, u32> mappa = {arena, 10u};
 
-    for ( u32 i = 0; i < names._size; i += 1 ) {
-        if ( i == 0 ) {
-            printf("     | dist | indx | indx | head | body       |\n");
-            printf("     + ---- + ---- + ---- + ---- + ---------- +\n");
-        }
+    for ( u32 i = 0; i < 20u; i += 1u )
+        mappa.insert('0' + i, i);
 
-        printf("%3u. ", i);
+    for ( u32 i = 0; i < size; i += 1u ) {
+        printf("%3hhu ", ((i8*) pntr)[i]);
 
-        if ( names._ctrl[i].dist != 0 )
-            printf("| %4u | %4u | ", names._ctrl[i].dist, names._ctrl[i].indx);
-        else
-            printf("|      |      | ");
-
-        if ( i < names._count )
-            printf("%4u | %4u | %10s |\n", names._indx[i], names._head[i], names._body[i]);
-        else
-            printf("     |      |            |\n");
+        if ( (i + 1) % 16u == 0 )
+            printf("\n");
     }
 
-    printf("insert = %u\n", names.insert(15, "d"));
+    mappa['1'].val() = 3;
 
-    for ( u32 i = 0; i < names._size; i += 1 ) {
-        if ( i == 0 ) {
-            printf("     | dist | indx | indx | head | body       |\n");
-            printf("     + ---- + ---- + ---- + ---- + ---------- +\n");
-        }
+    auto key = mappa.keys();
+    auto val = mappa.values();
 
-        printf("%3u. ", i);
+    for ( u32 i = 0; i < key.size(); i += 1u )
+        printf("%c -> %u\n", key[i], val[i]);
 
-        if ( names._ctrl[i].dist != 0 )
-            printf("| %4u | %4u | ", names._ctrl[i].dist, names._ctrl[i].indx);
-        else
-            printf("|      |      | ");
-
-        if ( i < names._count )
-            printf("%4u | %4u | %10s |\n", names._indx[i], names._head[i], names._body[i]);
-        else
-            printf("     |      |            |\n");
-    }
-
-    auto k = names.keys();
-    auto v = names.values();
-
-    printf("values =\n");
-
-    for ( u32 i = 0; i < v.size(); i += 1 )
-        printf("%3u. '%s'\n", k[i], v[i]);
-
-    names[5].val() = "z";
-
-    printf("values =\n");
-
-    for ( u32 i = 0; i < v.size(); i += 1 )
-        printf("%3u. '%s'\n", k[i], v[i]);
+    free(pntr);
 }

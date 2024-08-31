@@ -59,7 +59,7 @@ namespace scent
     void
     Robin_Map<Key, Val, Ctx>::reset()
     {
-        for ( u32 i = 0; i < _size; i += 1 )
+        for ( u32 i = 0; i < _size; i += 1u )
             _ctrl[i].dist = 0;
 
         _count = 0;
@@ -155,24 +155,23 @@ namespace scent
 
         u32  hash = Ctx::hash(key);
         u32  numb = 0;
-        Ctrl ctrl = {1, _count};
+        Ctrl ctrl = {1u, _count};
 
-        for ( u32 i = 0; i < _size; i += 1 ) {
+        for ( u32 i = 0; i < _size; i += 1u ) {
             u32 iter = (hash + i) % _size;
             u32 indx = _ctrl[iter].indx;
 
             if ( _ctrl[iter].dist == 0 ) {
-                if ( numb != 0 )
-                    _indx[_count] = numb - 1;
-                else
-                    _indx[_count] = iter;
-
-                _head[_count] = key;
-                _body[_count] = val;
+                if ( numb == 0 )
+                    numb = iter + 1u;
 
                 _ctrl[iter] = ctrl;
 
-                _count += 1;
+                _indx[_count] = numb - 1u;
+                _head[_count] = key;
+                _body[_count] = val;
+
+                _count += 1u;
 
                 break;
             }
@@ -186,91 +185,123 @@ namespace scent
                 swap(_ctrl[iter], ctrl);
 
                 if ( numb == 0 )
-                    numb = _indx[indx] + 1;
+                    numb = _indx[indx] + 1u;
 
-                _indx[ctrl.indx] += 1;
+                _indx[ctrl.indx] += 1u;
                 _indx[ctrl.indx] %= _size;
             }
 
-            ctrl.dist += 1;
+            ctrl.dist += 1u;
         }
-
-        return true;
-
-        // u32  hash = Ctx::get(key);
-        // u32  indx = 0;
-        // Ctrl ctrl = {key, 1, hash};
-        // Body body = {val};
-
-        // for ( u32 i = 0; i < _size; i += 1 ) {
-        //     indx = (hash + i) % _size;
-
-        //     if ( _ctrl[indx].dist != 0 ) {
-        //         if ( hash == _ctrl[indx].hash ) {
-        //             if ( Ctx::eql(_ctrl[indx].key, ctrl.key) )
-        //                 break;
-        //         }
-
-        //         if ( _ctrl[indx].dist < ctrl.dist ) {
-        //             swap(_ctrl[indx], ctrl);
-        //             swap(_body[indx], body);
-        //         }
-
-        //         ctrl.dist += 1;
-        //     } else {
-        //         _ctrl[indx] = ctrl;
-        //         _count += 1;
-
-        //         break;
-        //     }
-        // }
-
-        // _body[indx] = body;
 
         return true;
     }
 
     template <class Key, class Val, class Ctx>
     bool
-    Robin_Map<Key, Val, Ctx>::remove(const Key&)
+    Robin_Map<Key, Val, Ctx>::update(const Key& key, const Val& val)
     {
-        return false;
+        if ( _count == _size ) return false;
 
-        // if ( _count == 0 ) return false;
+        u32  hash = Ctx::hash(key);
+        u32  numb = 0;
+        Ctrl ctrl = {1u, _count};
 
-        // u32 hash = Ctx::get(key);
-        // u32 indx = 0;
+        for ( u32 i = 0; i < _size; i += 1u ) {
+            u32 iter = (hash + i) % _size;
+            u32 indx = _ctrl[iter].indx;
 
-        // for ( u32 i = 0; i < _size; i += 1 ) {
-        //     indx = (hash + i) % _size;
+            if ( _ctrl[iter].dist == 0 ) {
+                if ( numb == 0 )
+                    numb = iter + 1u;
 
-        //     if ( _ctrl[indx].dist > i ) {
-        //         if ( hash == _ctrl[indx].hash ) {
-        //             if ( Ctx::eql(_ctrl[indx].key, key) )
-        //                 break;
-        //         }
-        //     } else
-        //         return false;
-        // }
+                _ctrl[iter] = ctrl;
 
-        // for ( u32 i = 0; i < _size; i += 1 ) {
-        //     u32 next = (indx + 1) % _size;
+                _indx[_count] = numb - 1u;
+                _head[_count] = key;
+                _body[_count] = val;
 
-        //     if ( _ctrl[next].dist > 1 ) {
-        //         _ctrl[next].dist -= 1;
+                _count += 1u;
 
-        //         _ctrl[indx] = _ctrl[next];
-        //         _body[indx] = _body[next];
-        //     } else
-        //         break;
+                break;
+            }
 
-        //     indx = next;
-        // }
+            if ( iter == _indx[indx] ) {
+                if ( Ctx::equals(_head[indx], key) ) {
+                    _body[indx] = val;
 
-        // _ctrl[indx].dist = 0;
-        // _count -= 1;
+                    break;
+                }
+            }
 
-        // return true;
+            if ( _ctrl[iter].dist < ctrl.dist ) {
+                swap(_ctrl[iter], ctrl);
+
+                if ( numb == 0 )
+                    numb = _indx[indx] + 1u;
+
+                _indx[ctrl.indx] += 1u;
+                _indx[ctrl.indx] %= _size;
+            }
+
+            ctrl.dist += 1u;
+        }
+
+        return true;
+    }
+
+    template <class Key, class Val, class Ctx>
+    bool
+    Robin_Map<Key, Val, Ctx>::remove(const Key& key)
+    {
+        if ( _count == 0 ) return false;
+
+        u32 hash = Ctx::hash(key);
+        u32 iter = 0;
+
+        for ( u32 i = 0; i < _size; i += 1u ) {
+            iter = (hash + i) % _size;
+
+            if ( _ctrl[iter].dist < i ) return false;
+
+            u32 indx = _ctrl[iter].indx;
+
+            if ( iter == _indx[indx] ) {
+                if ( Ctx::equals(_head[indx], key) ) {
+                    _count -= 1u;
+
+                    u32 last = _indx[_count];
+
+                    swap(_body[indx], _body[_count]);
+                    swap(_head[indx], _head[_count]);
+                    swap(_indx[indx], _indx[_count]);
+
+                    _ctrl[last].indx = indx;
+
+                    break;
+                }
+            }
+        }
+
+        for ( u32 i = 0; i < _size; i += 1u ) {
+            u32 next = (iter + 1u) % _size;
+            u32 indx = _ctrl[next].indx;
+
+            if ( _ctrl[next].dist < 2u ) break;
+
+            _ctrl[iter] = _ctrl[next];
+            _ctrl[iter].dist -= 1u;
+
+            _indx[indx] += _size;
+            _indx[indx] -= 1u;
+            _indx[indx] %= _size;
+
+            iter = next;
+        }
+
+        _ctrl[iter].dist = 0;
+
+        return true;
     }
 
     template <class Key, class Val, class Ctx>
@@ -281,7 +312,7 @@ namespace scent
 
         u32 hash = Ctx::hash(key);
 
-        for ( u32 i = 0; i < _size; i += 1 ) {
+        for ( u32 i = 0; i < _size; i += 1u ) {
             u32 iter = (hash + i) % _size;
             u32 indx = _ctrl[iter].indx;
 
@@ -304,7 +335,7 @@ namespace scent
 
         u32 hash = Ctx::hash(key);
 
-        for ( u32 i = 0; i < _size; i += 1 ) {
+        for ( u32 i = 0; i < _size; i += 1u ) {
             u32 iter = (hash + i) % _size;
             u32 indx = _ctrl[iter].indx;
 

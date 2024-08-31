@@ -129,7 +129,7 @@ namespace scent
 
         if ( pntr == 0 ) return false;
 
-        for ( u32 i = 0; i < _count; i += 1 )
+        for ( u32 i = 0; i < _count; i += 1u )
             pntr[i] = _pntr[i];
 
         alloc_release<Val>(_alloc, _pntr);
@@ -146,16 +146,16 @@ namespace scent
     Array_List<Val>::insert(u32 index, const Val& val)
     {
         if ( _count == _size )
-            resize(_size + _size / 2 + 1);
+            resize(_size + _size / 2u + 1u);
 
         if ( _count == _size ) return false;
         if ( _count <  index ) return false;
 
-        for ( u32 i = _count; i > index; i -= 1 )
-            _pntr[i] = _pntr[i - 1];
+        for ( u32 i = _count; i > index; i -= 1u )
+            _pntr[i] = _pntr[i - 1u];
 
         _pntr[index] = val;
-        _count += 1;
+        _count += 1u;
 
         return true;
     }
@@ -165,7 +165,7 @@ namespace scent
     Array_List<Val>::push(u32 index, const Val& val)
     {
         if ( _count == _size )
-            resize(_size + _size / 2 + 1);
+            resize(_size + _size / 2u + 1u);
 
         if ( _count == _size ) return false;
         if ( _count <  index ) return false;
@@ -173,7 +173,7 @@ namespace scent
         _pntr[_count] = _pntr[index];
         _pntr[index]  = val;
 
-        _count += 1;
+        _count += 1u;
 
         return true;
     }
@@ -185,10 +185,10 @@ namespace scent
         if ( _count ==     0 ) return false;
         if ( _count <  index ) return false;
 
-        _count -= 1;
+        _count -= 1u;
 
-        for ( u32 i = index; i < _count; i += 1 )
-            _pntr[i] = _pntr[i + 1];
+        for ( u32 i = index; i < _count; i += 1u )
+            _pntr[i] = _pntr[i + 1u];
 
         return true;
     }
@@ -200,7 +200,7 @@ namespace scent
         if ( _count ==     0 ) return false;
         if ( _count <  index ) return false;
 
-        _count -= 1;
+        _count -= 1u;
         _pntr[index] = _pntr[_count];
 
         return true;

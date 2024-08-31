@@ -85,4 +85,41 @@ namespace scent
     {
         return k1 == k2;
     }
+
+    template <>
+    u32
+    Hash_Ctx<const i8*>::hash(const i8* const& key)
+    {
+        u32       hash = 5381u;
+        const i8* pntr = key;
+
+        if ( pntr == 0 ) return hash;
+
+        while ( *pntr != 0 ) {
+            hash =  ((hash << 5u) + hash) + *pntr;
+            pntr += 1u;
+        }
+
+        return hash;
+    }
+
+    template <>
+    bool
+    Hash_Ctx<const i8*>::equals(const i8* const& k1, const i8* const& k2)
+    {
+        const i8* ptr1 = k1;
+        const i8* ptr2 = k2;
+
+        if ( ptr1 == 0 || ptr2 == 0 )
+            return false;
+
+        while ( *ptr1 != 0 ) {
+            if ( *ptr1 != *ptr2 ) return false;
+
+            ptr1 += 1u;
+            ptr2 += 1u;
+        }
+
+        return true;
+    }
 } // scent
