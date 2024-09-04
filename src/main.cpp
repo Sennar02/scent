@@ -20,13 +20,6 @@ main()
     for ( u32 i = 0; i < 20u; i += 1u )
         mappa.insert('0' + i, i);
 
-    for ( u32 i = 0; i < size; i += 1u ) {
-        printf("%3hhu ", ((i8*) pntr)[i]);
-
-        if ( (i + 1) % 16u == 0 )
-            printf("\n");
-    }
-
     mappa['1'].val() = 3;
 
     auto key = mappa.keys();

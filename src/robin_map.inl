@@ -154,20 +154,20 @@ namespace scent
         if ( _count == _size ) return false;
 
         u32  hash = Ctx::hash(key);
-        u32  numb = 0;
         Ctrl ctrl = {1u, _count};
+        u32  help = 0;
+        bool swpd = false;
 
         for ( u32 i = 0; i < _size; i += 1u ) {
             u32 iter = (hash + i) % _size;
             u32 indx = _ctrl[iter].indx;
 
             if ( _ctrl[iter].dist == 0 ) {
-                if ( numb == 0 )
-                    numb = iter + 1u;
+                if ( swpd == false ) help = iter;
 
                 _ctrl[iter] = ctrl;
 
-                _indx[_count] = numb - 1u;
+                _indx[_count] = help;
                 _head[_count] = key;
                 _body[_count] = val;
 
@@ -184,8 +184,10 @@ namespace scent
             if ( _ctrl[iter].dist < ctrl.dist ) {
                 swap(_ctrl[iter], ctrl);
 
-                if ( numb == 0 )
-                    numb = _indx[indx] + 1u;
+                if ( swpd == false ) {
+                    help = _indx[indx];
+                    swpd = true;
+                }
 
                 _indx[ctrl.indx] += 1u;
                 _indx[ctrl.indx] %= _size;
@@ -204,20 +206,20 @@ namespace scent
         if ( _count == _size ) return false;
 
         u32  hash = Ctx::hash(key);
-        u32  numb = 0;
         Ctrl ctrl = {1u, _count};
+        u32  help = 0;
+        bool swpd = false;
 
         for ( u32 i = 0; i < _size; i += 1u ) {
             u32 iter = (hash + i) % _size;
             u32 indx = _ctrl[iter].indx;
 
             if ( _ctrl[iter].dist == 0 ) {
-                if ( numb == 0 )
-                    numb = iter + 1u;
+                if ( swpd == false ) help = iter;
 
                 _ctrl[iter] = ctrl;
 
-                _indx[_count] = numb - 1u;
+                _indx[_count] = help;
                 _head[_count] = key;
                 _body[_count] = val;
 
@@ -237,8 +239,10 @@ namespace scent
             if ( _ctrl[iter].dist < ctrl.dist ) {
                 swap(_ctrl[iter], ctrl);
 
-                if ( numb == 0 )
-                    numb = _indx[indx] + 1u;
+                if ( swpd == false ) {
+                    help = _indx[indx];
+                    swpd = true;
+                }
 
                 _indx[ctrl.indx] += 1u;
                 _indx[ctrl.indx] %= _size;
