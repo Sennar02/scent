@@ -1,32 +1,24 @@
-#include <stdio.h>
-#include <malloc.h>
-
-#include "utils.hpp"
-#include "robin_map.hpp"
-#include "arena_alloc.hpp"
+#include "application.hpp"
+#include "window.hpp"
 
 using namespace scent;
+
+static Application game;
 
 int
 main()
 {
-    u32   size = 1024u;
-    void* pntr = malloc(size);
+    Window window =
+        game.get_window("Prova", {640u, 360u}).val();
 
-    Arena_Alloc arena = {pntr, size};
+    window.show();
 
-    Robin_Map<i8, u32> mappa = {arena, 10u};
+    while ( game.update() ) {
+        Vec4<f32> rect = {10u, 10u, 620u, 340u};
 
-    for ( u32 i = 0; i < 20u; i += 1u )
-        mappa.insert('0' + i, i);
+        window.fill_rect(rect, COLOUR_BLACK);
+        window.render(COLOUR_WHITE);
+    }
 
-    mappa['1'].val() = 3;
-
-    auto key = mappa.keys();
-    auto val = mappa.values();
-
-    for ( u32 i = 0; i < key.size(); i += 1u )
-        printf("%c -> %u\n", key[i], val[i]);
-
-    free(pntr);
+    game.drop();
 }

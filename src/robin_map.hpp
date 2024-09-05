@@ -25,9 +25,7 @@ namespace scent
             u32 indx;
         };
 
-    // TODO(gio): rendi privato.
-    // private:
-    public:
+    private:
         /**
          *
          */
