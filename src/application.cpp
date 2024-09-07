@@ -1,49 +1,16 @@
-// todo(gio): rimuovere.
-#include <stdio.h>
-
-#include <assert.h>
 #include <SDL3/SDL.h>
 
 #include "application.hpp"
 
 namespace scent
 {
-    bool
-    update_window(Window& window, SDL_WindowEvent event, Window_Signal::Type type)
-    {
-        Window_Signal sigl = {type};
-        u32           code = event.windowID;
+    void
+    window_signal(Window* window, SDL_WindowEvent event);
 
-        // todo(trakot):
-        // read window from hash_map and update.
+    void
+    keyboard_signal(Keyboard* keyboard, SDL_KeyboardEvent event);
 
-        if ( window.code() == code )
-            return window.update(sigl);
-
-        return false;
-    }
-
-    bool
-    update_window_move(Window& window, SDL_WindowEvent event)
-    {
-        Window_Signal sigl = {Window_Signal::Type::MOVE};
-        u32           code = event.windowID;
-
-        sigl.coords = {event.data1, event.data2};
-
-        // todo(trakot):
-        // read window from hash_map and update.
-
-        if ( window.code() == code )
-            return window.update(sigl);
-
-        return false;
-    }
-
-    Application::Application()
-    {
-        init();
-    }
+    Application::Application() {}
 
     void
     Application::init()
@@ -58,46 +25,156 @@ namespace scent
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
 
-    Item_Ref<Window>
-    Application::get_window(const i8* title, Vec2<u32> size)
+    bool
+    Application::is_active() const
+    {
+        return _actv;
+    }
+
+    void
+    Application::stop()
+    {
+        _actv = false;
+    }
+
+    void
+    Application::init_window(Window& window)
     {
         // todo(trakot):
-        // insert (window_code, window) inside hash_map
-        // and then if the insertion is successful return
-        // a reference.
+        // insert (window_code, window) inside hash_map.
 
-        _wndw.init(title, size);
+        _wndw = &window;
+    }
 
-        return {_wndw};
+    void
+    Application::init_keyboard(Keyboard& keyboard)
+    {
+        _kybd = &keyboard;
     }
 
     bool
     Application::update()
     {
-        SDL_Event event;
-
-        while ( SDL_PollEvent(&event) != 0 ) {
-            switch ( event.type ) {
-                case SDL_EVENT_WINDOW_SHOWN:
-                    _actv &= update_window(_wndw, event.window, Window_Signal::Type::SHOW);
-                    break;
-
-                case SDL_EVENT_WINDOW_HIDDEN:
-                    _actv &= update_window(_wndw, event.window, Window_Signal::Type::HIDE);
-                    break;
-
-                case SDL_EVENT_WINDOW_MOVED:
-                    _actv &= update_window_move(_wndw, event.window);
-                    break;
-
-                case SDL_EVENT_QUIT:
-                    _actv = false;
-                    break;
-
-                default: break;
-            }
-        }
+        if ( _wndw != 0 ) _wndw->update();
+        if ( _kybd != 0 ) _kybd->update();
 
         return _actv;
     }
+
+    bool
+    Application::signal()
+    {
+        SDL_Event event;
+
+        if ( SDL_PollEvent(&event) == false )
+            return false;
+
+        switch ( event.type ) {
+            case SDL_EVENT_WINDOW_SHOWN:
+            case SDL_EVENT_WINDOW_HIDDEN:
+            case SDL_EVENT_WINDOW_MOVED: {
+                window_signal(_wndw, event.window);
+            } break;
+
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_KEY_UP: {
+                keyboard_signal(_kybd, event.key);
+            } break;
+
+            case SDL_EVENT_QUIT: {
+                _actv = false;
+            } break;
+
+            default: break;
+        }
+
+        return true;
+    }
+
+    void
+    Application::loop(Stage& stage, f32 frames)
+    {
+        f32 unit = 1.0f / frames;
+        f32 time = 0.0f;
+
+        if ( stage.init(*this) == false ) return;
+
+        _clck.update();
+
+        while ( update() ) {
+            time += _clck.update();
+
+            while ( signal() ) {
+                if ( stage.input() == false )
+                    stop();
+            }
+
+            stage.frame();
+
+            for ( ; time >= unit; time -= unit )
+                stage.tick(unit);
+
+            stage.draw();
+        }
+
+        stage.drop();
+    }
+
+    void
+    window_signal(Window* window, SDL_WindowEvent event)
+    {
+        Window_Signal signal;
+
+        if ( window == 0 || window->code() != event.windowID)
+            return;
+
+        switch ( event.type ) {
+            case SDL_EVENT_WINDOW_SHOWN: {
+                signal.type = Window_Signal::SHOW;
+            } break;
+
+            case SDL_EVENT_WINDOW_HIDDEN: {
+                signal.type = Window_Signal::HIDE;
+            } break;
+
+            case SDL_EVENT_WINDOW_MOVED: {
+                signal.type   = Window_Signal::MOVE;
+                signal.coords = {event.data1, event.data2};
+            } break;
+
+            default: break;
+        }
+
+        // todo(trakot): read window from hash_map and update.
+
+        window->signal(signal);
+    }
+
+    void
+    keyboard_signal(Keyboard* keyboard, SDL_KeyboardEvent event)
+    {
+        Keyboard_Signal signal;
+
+        if ( keyboard == 0 ) return;
+
+        switch ( event.type ) {
+            case SDL_EVENT_KEY_DOWN: {
+                signal.type = Keyboard_Signal::DOWN;
+            } break;
+
+            case SDL_EVENT_KEY_UP: {
+                signal.type = Keyboard_Signal::UP;
+            } break;
+
+            default: break;
+        }
+
+        signal.code   = event.key;
+        signal.scan   = event.scancode;
+        signal.modifs = event.mod;
+        signal.repeat = event.repeat;
+
+        keyboard->signal(signal);
+    }
 } // scent
+

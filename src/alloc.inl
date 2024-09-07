@@ -12,8 +12,7 @@ namespace scent
         if ( alloc == 0 ) return 0;
 
         return (Val*) alloc->acquire(
-            bytes, align
-        );
+            bytes, align);
     }
 
     template <class Val>
@@ -25,15 +24,13 @@ namespace scent
         if ( alloc == 0 ) return 0;
 
         return (Val*) alloc->resize(
-            (i8*) pntr, bytes
-        );
+            (i8*) pntr, bytes);
     }
 
     template <class Val>
     void
     alloc_release(Alloc* alloc, void* pntr)
     {
-        if ( alloc != 0 )
-            alloc->release((i8*) pntr);
+        if ( alloc != 0 ) alloc->release((i8*) pntr);
     }
 } // scent

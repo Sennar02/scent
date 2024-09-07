@@ -15,10 +15,11 @@ namespace scent
     void
     Slice<Val>::init(Val* pntr, u32 size)
     {
-        if ( pntr != 0 && size != 0 ) {
-            _pntr = pntr;
-            _size = size;
-        }
+        if ( pntr == 0 || size == 0 )
+            return;
+
+        _pntr = pntr;
+        _size = size;
     }
 
     template <class Val>

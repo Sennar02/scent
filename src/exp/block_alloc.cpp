@@ -64,7 +64,7 @@ namespace scent
     u32
     Block_Alloc::next(u8) const
     {
-        // TODO(gio): verificare allineamento.
+        // todo(trakot): verificare allineamento.
 
         return (_count != 0) * _unit;
     }
@@ -94,7 +94,7 @@ namespace scent
     i8*
     Block_Alloc::reserve(u32 size, u8)
     {
-        // TODO(gio): verificare allineamento.
+        // todo(trakot): verificare allineamento.
 
         void** node = _list;
         i8*    pntr = 0;
@@ -116,6 +116,6 @@ namespace scent
     void
     Block_Alloc::release(i8*)
     {
-        // TODO(gio): implementare la rilevazione di doppie free e il rilascio.
+        // todo(trakot): implementare la rilevazione di doppie free e il rilascio.
     }
 } // scent

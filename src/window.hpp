@@ -14,7 +14,7 @@ namespace scent
     struct Window_Signal
     {
     public:
-        enum class Type
+        enum Type
             : u32
         {
             SHOW = 1,
@@ -22,6 +22,7 @@ namespace scent
             MOVE = 3,
 
             COUNT = MOVE,
+            UNDEF,
         };
 
     public:
@@ -39,7 +40,7 @@ namespace scent
         };
 
     public:
-        Window_Signal(Type type);
+        Window_Signal();
     };
 
     struct Window
@@ -69,11 +70,17 @@ namespace scent
         bool
         isnt_visible() const;
 
+        Vec2<i32>
+        coords() const;
+
         void
         show();
 
         void
         hide();
+
+        void
+        move(Vec2<i32> coords);
 
         void
         fill_rect(Vec4<f32> rect, Colour colour);
@@ -87,8 +94,11 @@ namespace scent
         void
         render(Colour colour);
 
-        bool
-        update(Window_Signal signal);
+        void
+        update();
+
+        void
+        signal(Window_Signal signal);
     };
 } // scent
 

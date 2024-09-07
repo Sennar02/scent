@@ -1,16 +1,12 @@
-// todo(gio): rendi privato.
-#include <stdio.h>
-
-#include <assert.h>
 #include <SDL3/SDL.h>
 
 #include "window.hpp"
 
 namespace scent
 {
-    Window_Signal::Window_Signal(Type type)
-        : type {type}
-        , size {0, 0}
+    Window_Signal::Window_Signal()
+        : type {UNDEF}
+        , size {}
     {}
 
     Window::Window() {}
@@ -28,6 +24,8 @@ namespace scent
         assert(size.a != 0 && "Window width is zero.");
         assert(size.b != 0 && "Window height is zero.");
 
+        if ( _wndw != 0 ) drop();
+
         _wndw = SDL_CreateWindow(title, size.a, size.b, flags);
 
         if ( _wndw != 0 ) {
@@ -43,7 +41,8 @@ namespace scent
     void
     Window::drop()
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _wndw == 0 || _rndr == 0 )
+            return;
 
         SDL_DestroyRenderer(_rndr);
         SDL_DestroyWindow(_wndw);
@@ -55,9 +54,10 @@ namespace scent
     u32
     Window::code() const
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _wndw != 0 )
+            return SDL_GetWindowID(_wndw);
 
-        return SDL_GetWindowID(_wndw);
+        return 0;
     }
 
     bool
@@ -72,34 +72,41 @@ namespace scent
         return _vsbl == false;
     }
 
+    Vec2<i32>
+    Window::coords() const
+    {
+        Vec2<i32> coords;
+
+        if ( _wndw != 0 )
+            SDL_GetWindowPosition(_wndw, &coords.a, &coords.b);
+
+        return coords;
+    }
+
     void
     Window::show()
     {
-        assert(_rndr != 0 && "The window does not exist.");
-
-        _vsbl = true;
-
-        SDL_ShowWindow(_wndw);
+        if ( _wndw != 0 ) SDL_ShowWindow(_wndw);
     }
 
     void
     Window::hide()
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _wndw != 0 ) SDL_HideWindow(_wndw);
+    }
 
-        _vsbl = false;
-
-        SDL_HideWindow(_wndw);
+    void
+    Window::move(Vec2<i32> coords)
+    {
+        if ( _wndw != 0 ) SDL_SetWindowPosition(_wndw, coords.a, coords.b);
     }
 
     void
     Window::fill_rect(Vec4<f32> rect, Colour colour)
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _rndr == 0 ) return;
 
-        SDL_FRect fill = {
-            rect.a, rect.b, rect.c, rect.d,
-        };
+        SDL_FRect fill = {rect.a, rect.b, rect.c, rect.d};
 
         SDL_SetRenderDrawColor(_rndr,
             colour.a, colour.b, colour.c, colour.d
@@ -112,11 +119,9 @@ namespace scent
     void
     Window::draw_rect(Vec4<f32> rect, Colour colour)
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _rndr == 0 ) return;
 
-        SDL_FRect fill = {
-            rect.a, rect.b, rect.c, rect.d,
-        };
+        SDL_FRect fill = {rect.a, rect.b, rect.c, rect.d};
 
         SDL_SetRenderDrawColor(_rndr,
             colour.a, colour.b, colour.c, colour.d
@@ -129,7 +134,7 @@ namespace scent
     void
     Window::render()
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _rndr == 0 ) return;
 
         SDL_RenderPresent(_rndr);
         SDL_RenderClear(_rndr);
@@ -138,7 +143,7 @@ namespace scent
     void
     Window::render(Colour colour)
     {
-        assert(_rndr != 0 && "The window does not exist.");
+        if ( _rndr == 0 ) return;
 
         SDL_SetRenderDrawColor(_rndr,
             colour.a, colour.b, colour.c, colour.d
@@ -149,16 +154,25 @@ namespace scent
         SDL_SetRenderDrawColor(_rndr, 0, 0, 0, 0);
     }
 
-    bool
-    Window::update(Window_Signal event)
-    {
-        if ( event.type == Window_Signal::Type::MOVE )
-            printf("Window update [coords = (%u, %u)]\n",
-                event.coords.a, event.coords.b
-            );
-        else
-            printf("Window update\n");
+    void
+    Window::update()
+    {}
 
-        return true;
+    void
+    Window::signal(Window_Signal signal)
+    {
+        switch ( signal.type ) {
+            case Window_Signal::SHOW: {
+                _vsbl = true;
+            } break;
+
+            case Window_Signal::HIDE: {
+                _vsbl = false;
+            } break;
+
+            case Window_Signal::MOVE:
+            case Window_Signal::UNDEF:
+                break;
+        }
     }
 } // scent
