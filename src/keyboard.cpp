@@ -42,10 +42,18 @@ namespace scent
     }
 
     void
+    Keyboard::init_emitter(Alloc& alloc, u32 size)
+    {
+        _emtr.init(alloc, size);
+    }
+
+    void
     Keyboard::drop()
     {
         _states = 0;
         _modifs = 0;
+
+        _emtr.drop();
     }
 
     bool
@@ -84,6 +92,26 @@ namespace scent
         return false;
     }
 
+    bool
+    Keyboard::attach(void (*fptr) (Keyboard_Signal))
+    {
+        return _emtr.attach(fptr);
+    }
+
+    template <class Ctx>
+    bool
+    Keyboard::attach(void (*fptr) (Ctx&, Keyboard_Signal), Ctx& self)
+    {
+        return _emtr.attach(fptr, self);
+    }
+
+    template <class Ctx>
+    bool
+    Keyboard::attach(void (*fptr) (const Ctx&, Keyboard_Signal), Ctx& self)
+    {
+        return _emtr.attach(fptr, self);
+    }
+
     void
     Keyboard::update()
     {
@@ -94,7 +122,7 @@ namespace scent
     }
 
     void
-    Keyboard::signal(Keyboard_Signal signal)
+    Keyboard::signal(const Keyboard_Signal& signal)
     {
         u8 first = signal.repeat == 0;
 
@@ -112,5 +140,7 @@ namespace scent
             case Keyboard_Signal::UNDEF:
                 break;
         }
+
+        _emtr.emit(signal);
     }
 } // scent

@@ -5,6 +5,7 @@
 #include "vec2.hpp"
 #include "vec4.hpp"
 #include "colour.hpp"
+#include "emitter.hpp"
 
 struct SDL_Window;
 struct SDL_Renderer;
@@ -17,88 +18,193 @@ namespace scent
         enum Type
             : u32
         {
-            SHOW = 1,
-            HIDE = 2,
-            MOVE = 3,
+            UNDEF = 0,
+            SHOW  = 1u,
+            HIDE  = 2u,
+            MOVE  = 3u,
 
             COUNT = MOVE,
-            UNDEF,
         };
 
     public:
+        /**
+         *
+         */
         Type type;
 
         union {
-            // RESIZE, PIXEL_SIZE_CHANGE.
+            /**
+             * RESIZE, PIXEL_SIZE_CHANGE.
+             */
             Vec2<i32> size;
 
-            // MOVE.
+            /**
+             * MOVE.
+             */
             Vec2<i32> coords;
 
-            // SCREEN_CHANGE.
+            /**
+             * SCREEN_CHANGE.
+             */
             i32 screen;
         };
 
     public:
+        /**
+         *
+         */
         Window_Signal();
     };
 
     struct Window
     {
     private:
-        SDL_Window*   _wndw = 0;
+        /**
+         *
+         */
+        SDL_Window* _wndw = 0;
+
+        /**
+         *
+         */
         SDL_Renderer* _rndr = 0;
-        bool          _vsbl = false;
+
+        /**
+         *
+         */
+        Emitter<Window_Signal> _emtr;
+
+        /**
+         *
+         */
+        bool _vsbl = false;
 
     public:
+        /**
+         *
+         */
         Window();
 
+        /**
+         *
+         */
         Window(const i8* title, Vec2<u32> size);
 
+        /**
+         *
+         */
         void
         init(const i8* title, Vec2<u32> size);
 
+        /**
+         *
+         */
+        void
+        init_emitter(Alloc& alloc, u32 size);
+
+        /**
+         *
+         */
         void
         drop();
 
+        /**
+         *
+         */
         u32
         code() const;
 
+        /**
+         *
+         */
         bool
         is_visible() const;
 
+        /**
+         *
+         */
         bool
         isnt_visible() const;
 
+        /**
+         *
+         */
         Vec2<i32>
         coords() const;
 
+        /**
+         *
+         */
         void
         show();
 
+        /**
+         *
+         */
         void
         hide();
 
+        /**
+         *
+         */
         void
         move(Vec2<i32> coords);
 
+        /**
+         *
+         */
         void
         fill_rect(Vec4<f32> rect, Colour colour);
 
+        /**
+         *
+         */
         void
         draw_rect(Vec4<f32> rect, Colour colour);
 
+        /**
+         *
+         */
         void
         render();
 
+        /**
+         *
+         */
         void
         render(Colour colour);
 
+        /**
+         *
+         */
+        bool
+        attach(void (*fptr) (Window_Signal));
+
+        /**
+         *
+         */
+        template <class Ctx>
+        bool
+        attach(void (*fptr) (Ctx&, Window_Signal), Ctx& self);
+
+        /**
+         *
+         */
+        template <class Ctx>
+        bool
+        attach(void (*fptr) (const Ctx&, Window_Signal), Ctx& self);
+
+        /**
+         *
+         */
         void
         update();
 
+        /**
+         *
+         */
         void
-        signal(Window_Signal signal);
+        signal(const Window_Signal& signal);
     };
 } // scent
 

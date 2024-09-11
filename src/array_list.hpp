@@ -76,6 +76,18 @@ namespace scent
         /**
          *
          */
+        u32
+        head() const;
+
+        /**
+         *
+         */
+        u32
+        tail() const;
+
+        /**
+         *
+         */
         Slice<const Val>
         values() const;
 
@@ -125,13 +137,37 @@ namespace scent
          * Ordered insert.
          */
         bool
-        insert(u32 index, const Val& val);
+        insert(u32 index, const Val& val = {});
+
+        /**
+         * Same as insert(0, val).
+         */
+        bool
+        insert_head(const Val& val = {});
+
+        /**
+         * Same as insert(count(), val).
+         */
+        bool
+        insert_tail(const Val& val = {});
 
         /**
          * Swapping insert.
          */
         bool
-        push(u32 index, const Val& val);
+        push(u32 index, const Val& val = {});
+
+        /**
+         * Same as push(0, val).
+         */
+        bool
+        push_head(const Val& val = {});
+
+        /**
+         * Same as push(count(), val).
+         */
+        bool
+        push_tail(const Val& val = {});
 
         /**
          * Ordered remove.
@@ -140,10 +176,34 @@ namespace scent
         remove(u32 index);
 
         /**
+         * Same as remove(0);
+         */
+        bool
+        remove_head();
+
+        /**
+         * Same as remove(tail());
+         */
+        bool
+        remove_tail();
+
+        /**
          * Swapping remove.
          */
         bool
         pull(u32 index);
+
+        /**
+         * Same as pull(0).
+         */
+        bool
+        pull_head();
+
+        /**
+         * Same as pull(tail()).
+         */
+        bool
+        pull_tail();
 
         /**
          *

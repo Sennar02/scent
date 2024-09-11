@@ -4,6 +4,7 @@
 #include "types.hpp"
 #include "slice.hpp"
 #include "alloc.hpp"
+#include "utils.hpp"
 #include "hash_ctx.hpp"
 #include "pair_ref.hpp"
 
@@ -166,13 +167,13 @@ namespace scent
          *
          */
         bool
-        insert(const Key& key, const Val& val);
+        insert(const Key& key, const Val& val = {});
 
         /**
          *
          */
         bool
-        update(const Key& key, const Val& val);
+        update(const Key& key, const Val& val = {});
 
         /**
          *

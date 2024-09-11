@@ -39,6 +39,12 @@ namespace scent
     }
 
     void
+    Window::init_emitter(Alloc& alloc, u32 size)
+    {
+        _emtr.init(alloc, size);
+    }
+
+    void
     Window::drop()
     {
         if ( _wndw == 0 || _rndr == 0 )
@@ -49,6 +55,8 @@ namespace scent
 
         _wndw = 0;
         _rndr = 0;
+
+        _emtr.drop();
     }
 
     u32
@@ -154,12 +162,32 @@ namespace scent
         SDL_SetRenderDrawColor(_rndr, 0, 0, 0, 0);
     }
 
+    bool
+    Window::attach(void (*fptr) (Window_Signal))
+    {
+        return _emtr.attach(fptr);
+    }
+
+    template <class Ctx>
+    bool
+    Window::attach(void (*fptr) (Ctx&, Window_Signal), Ctx& self)
+    {
+        return _emtr.attach(fptr, self);
+    }
+
+    template <class Ctx>
+    bool
+    Window::attach(void (*fptr) (const Ctx&, Window_Signal), Ctx& self)
+    {
+        return _emtr.attach(fptr, self);
+    }
+
     void
     Window::update()
     {}
 
     void
-    Window::signal(Window_Signal signal)
+    Window::signal(const Window_Signal& signal)
     {
         switch ( signal.type ) {
             case Window_Signal::SHOW: {
@@ -174,5 +202,7 @@ namespace scent
             case Window_Signal::UNDEF:
                 break;
         }
+
+        _emtr.emit(signal);
     }
 } // scent

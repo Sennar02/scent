@@ -58,6 +58,20 @@ namespace scent
     }
 
     template <class Val>
+    u32
+    Array_List<Val>::head() const
+    {
+        return 0;
+    }
+
+    template <class Val>
+    u32
+    Array_List<Val>::tail() const
+    {
+        return (_count != 0) * (_count - 1u);
+    }
+
+    template <class Val>
     Slice<const Val>
     Array_List<Val>::values() const
     {
@@ -162,6 +176,20 @@ namespace scent
 
     template <class Val>
     bool
+    Array_List<Val>::insert_head(const Val& val)
+    {
+        return insert(0, val);
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::insert_tail(const Val& val)
+    {
+        return insert(_count, val);
+    }
+
+    template <class Val>
+    bool
     Array_List<Val>::push(u32 index, const Val& val)
     {
         if ( _count == _size )
@@ -176,6 +204,20 @@ namespace scent
         _count += 1u;
 
         return true;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::push_head(const Val& val)
+    {
+        return push(0, val);
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::push_tail(const Val& val)
+    {
+        return push(_count, val);
     }
 
     template <class Val>
@@ -195,6 +237,20 @@ namespace scent
 
     template <class Val>
     bool
+    Array_List<Val>::remove_head()
+    {
+        return remove(0);
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::remove_tail()
+    {
+        return remove(_count - 1u);
+    }
+
+    template <class Val>
+    bool
     Array_List<Val>::pull(u32 index)
     {
         if ( _count ==     0 ) return false;
@@ -204,6 +260,20 @@ namespace scent
         _pntr[index] = _pntr[_count];
 
         return true;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::pull_head()
+    {
+        return pull(0);
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::pull_tail()
+    {
+        return pull(_count - 1u);
     }
 
     template <class Val>

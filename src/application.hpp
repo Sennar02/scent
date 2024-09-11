@@ -12,38 +12,83 @@ namespace scent
     struct Application
     {
     private:
-        Clock     _clck;
-        Window*   _wndw = 0;
+        /**
+         *
+         */
+        Clock _clck;
+
+        /**
+         *
+         */
+        Window* _wndw = 0;
+
+        /**
+         *
+         */
         Keyboard* _kybd = 0;
-        bool      _actv = false;
+
+        /**
+         *
+         */
+        bool _actv = false;
 
     public:
+        /**
+         *
+         */
         Application();
 
+        /**
+         *
+         */
         void
         init();
 
+        /**
+         *
+         */
         void
         drop();
 
+        /**
+         *
+         */
         bool
         is_active() const;
 
+        /**
+         *
+         */
         void
         stop();
 
+        /**
+         *
+         */
         void
         init_window(Window& window);
 
+        /**
+         *
+         */
         void
         init_keyboard(Keyboard& keyboard);
 
+        /**
+         *
+         */
         bool
         update();
 
+        /**
+         *
+         */
         bool
         signal();
 
+        /**
+         *
+         */
         void
         loop(Stage& stage, f32 frames);
     };
