@@ -84,7 +84,7 @@ namespace scent
          *
          */
         bool
-        signal();
+        handle();
 
         /**
          *

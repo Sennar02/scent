@@ -44,6 +44,34 @@ namespace scent
     }
 
     template <class Val>
+    bool
+    Array_List<Val>::is_empty() const
+    {
+        return _count == 0;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::isnt_empty() const
+    {
+        return _count != 0;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::is_full() const
+    {
+        return _count == _size;
+    }
+
+    template <class Val>
+    bool
+    Array_List<Val>::isnt_full() const
+    {
+        return _count != _size;
+    }
+
+    template <class Val>
     u32
     Array_List<Val>::size() const
     {
@@ -83,34 +111,6 @@ namespace scent
     Array_List<Val>::values()
     {
         return {_pntr, _count};
-    }
-
-    template <class Val>
-    bool
-    Array_List<Val>::is_empty() const
-    {
-        return _count == 0;
-    }
-
-    template <class Val>
-    bool
-    Array_List<Val>::isnt_empty() const
-    {
-        return _count != 0;
-    }
-
-    template <class Val>
-    bool
-    Array_List<Val>::is_full() const
-    {
-        return _count == _size;
-    }
-
-    template <class Val>
-    bool
-    Array_List<Val>::isnt_full() const
-    {
-        return _count != _size;
     }
 
     template <class Val>
@@ -278,7 +278,7 @@ namespace scent
 
     template <class Val>
     Item_Ref<const Val>
-    Array_List<Val>::operator[](u32 index) const
+    Array_List<Val>::find(u32 index) const
     {
         if ( index < _count )
             return {_pntr[index]};
@@ -288,11 +288,29 @@ namespace scent
 
     template <class Val>
     Item_Ref<Val>
-    Array_List<Val>::operator[](u32 index)
+    Array_List<Val>::find(u32 index)
     {
         if ( index < _count )
             return {_pntr[index]};
 
         return {};
+    }
+
+    template <class Val>
+    const Val&
+    Array_List<Val>::operator[](u32 index) const
+    {
+        assert(index < _count && "Index out of bounds");
+
+        return _pntr[index];
+    }
+
+    template <class Val>
+    Val&
+    Array_List<Val>::operator[](u32 index)
+    {
+        assert(index < _count && "Index out of bounds");
+
+        return _pntr[index];
     }
 } // scent

@@ -310,7 +310,7 @@ namespace scent
 
     template <class Key, class Val, class Ctx>
     Pair_Ref<const Key, const Val>
-    Robin_Map<Key, Val, Ctx>::operator[](const Key& key) const
+    Robin_Map<Key, Val, Ctx>::find(const Key& key) const
     {
         if ( _count == 0 ) return {};
 
@@ -333,7 +333,7 @@ namespace scent
 
     template <class Key, class Val, class Ctx>
     Pair_Ref<const Key, Val>
-    Robin_Map<Key, Val, Ctx>::operator[](const Key& key)
+    Robin_Map<Key, Val, Ctx>::find(const Key& key)
     {
         if ( _count == 0 ) return {};
 
@@ -352,5 +352,55 @@ namespace scent
         }
 
         return {};
+    }
+
+    template <class Key, class Val, class Ctx>
+    const Val&
+    Robin_Map<Key, Val, Ctx>::operator[](const Key& key) const
+    {
+        assert(_count != 0 && "Unknown key");
+
+        u32 hash = Ctx::hash(key);
+        u32 iter = 0;
+        u32 indx = 0;
+
+        for ( u32 i = 0; i < _size; i += 1u ) {
+            iter = (hash + i) % _size;
+            indx = _ctrl[iter].indx;
+
+            assert(_ctrl[iter].dist < i && "Unknown key");
+
+            if ( iter == _indx[indx] ) {
+                if ( Ctx::equals(_head[indx], key) )
+                    break;
+            }
+        }
+
+        return {key, _body[indx]};
+    }
+
+    template <class Key, class Val, class Ctx>
+    Val&
+    Robin_Map<Key, Val, Ctx>::operator[](const Key& key)
+    {
+        assert(_count != 0 && "Unknown key");
+
+        u32 hash = Ctx::hash(key);
+        u32 iter = 0;
+        u32 indx = 0;
+
+        for ( u32 i = 0; i < _size; i += 1u ) {
+            iter = (hash + i) % _size;
+            indx = _ctrl[iter].indx;
+
+            assert(_ctrl[iter].dist < i && "Unknown key");
+
+            if ( iter == _indx[indx] ) {
+                if ( Ctx::equals(_head[indx], key) )
+                    break;
+            }
+        }
+
+        return {key, _body[indx]};
     }
 } // scent

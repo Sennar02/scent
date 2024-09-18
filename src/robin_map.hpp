@@ -185,12 +185,24 @@ namespace scent
          *
          */
         Pair_Ref<const Key, const Val>
-        operator[](const Key& key) const;
+        find(const Key& key) const;
 
         /**
          *
          */
         Pair_Ref<const Key, Val>
+        find(const Key& key);
+
+        /**
+         *
+         */
+        const Val&
+        operator[](const Key& key) const;
+
+        /**
+         *
+         */
+        Val&
         operator[](const Key& key);
     };
 } // scent

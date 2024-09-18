@@ -6,31 +6,41 @@ namespace scent
     Val*
     alloc_acquire(Alloc* alloc, u32 size)
     {
-        u32 bytes = sizeof(Val) * size;
-        u8  align = alignof(Val);
+        i8* resl = 0;
 
-        if ( alloc == 0 ) return 0;
+        if ( alloc != 0 ) {
+            u32 bytes = sizeof(Val) * size;
+            u8  align = alignof(Val);
 
-        return (Val*) alloc->acquire(
-            bytes, align);
+            resl = alloc->acquire(bytes, align);
+        }
+
+        return (Val*) resl;
     }
 
     template <class Val>
     Val*
     alloc_resize(Alloc* alloc, void* pntr, u32 size)
     {
-        u32 bytes = sizeof(Val) * size;
+        i8* addr = (i8*) pntr;
+        i8* resl = 0;
 
-        if ( alloc == 0 ) return 0;
+        if ( alloc != 0 ) {
+            u32 bytes = sizeof(Val) * size;
 
-        return (Val*) alloc->resize(
-            (i8*) pntr, bytes);
+            resl = alloc->resize(addr, bytes);
+        }
+
+        return (Val*) resl;
     }
 
     template <class Val>
     void
     alloc_release(Alloc* alloc, void* pntr)
     {
-        if ( alloc != 0 ) alloc->release((i8*) pntr);
+        i8* addr = (i8*) pntr;
+
+        if ( alloc != 0 )
+            alloc->release(addr);
     }
 } // scent

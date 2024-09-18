@@ -5,10 +5,61 @@
 namespace scent
 {
     void
-    window_signal(Window* window, SDL_WindowEvent event);
+    message_window(Window* window, SDL_WindowEvent event)
+    {
+        Window_Msg message;
+
+        // todo(trakot): read window from registry and update.
+
+        switch ( event.type ) {
+            case SDL_EVENT_WINDOW_SHOWN: {
+                message.type = Window_Msg::SHOW;
+            } break;
+
+            case SDL_EVENT_WINDOW_HIDDEN: {
+                message.type = Window_Msg::HIDE;
+            } break;
+
+            case SDL_EVENT_WINDOW_MOVED: {
+                message.type   = Window_Msg::MOVE;
+                message.coords = {event.data1, event.data2};
+            } break;
+
+            default: break;
+        }
+
+
+        if ( window != 0 && window->desc() == event.windowID )
+            window->send(message);
+    }
 
     void
-    keyboard_signal(Keyboard* keyboard, SDL_KeyboardEvent event);
+    message_keyboard(Keyboard* keyboard, SDL_KeyboardEvent event)
+    {
+        Keyboard_Msg message;
+
+        // todo(trakot): read keyboard from registry and update.
+
+        switch ( event.type ) {
+            case SDL_EVENT_KEY_DOWN: {
+                message.type = Keyboard_Msg::DOWN;
+            } break;
+
+            case SDL_EVENT_KEY_UP: {
+                message.type = Keyboard_Msg::UP;
+            } break;
+
+            default: break;
+        }
+
+        message.code   = event.key;
+        message.scan   = event.scancode;
+        message.modifs = event.mod;
+        message.repeat = event.repeat;
+
+        if ( keyboard != 0 )
+            keyboard->send(message);
+    }
 
     Application::Application() {}
 
@@ -40,8 +91,7 @@ namespace scent
     void
     Application::init_window(Window& window)
     {
-        // todo(trakot):
-        // insert (window_code, window) inside hash_map.
+        // todo(trakot): insert window in registry.
 
         _wndw = &window;
     }
@@ -49,12 +99,16 @@ namespace scent
     void
     Application::init_keyboard(Keyboard& keyboard)
     {
+        // todo(trakot): insert keyboard in registry.
+
         _kybd = &keyboard;
     }
 
     bool
     Application::update()
     {
+        // todo(trakot): update every resource in registry.
+
         if ( _wndw != 0 ) _wndw->update();
         if ( _kybd != 0 ) _kybd->update();
 
@@ -62,23 +116,22 @@ namespace scent
     }
 
     bool
-    Application::signal()
+    Application::handle()
     {
         SDL_Event event;
 
-        if ( SDL_PollEvent(&event) == false )
-            return false;
+        if ( SDL_PollEvent(&event) == false ) return false;
 
         switch ( event.type ) {
             case SDL_EVENT_WINDOW_SHOWN:
             case SDL_EVENT_WINDOW_HIDDEN:
             case SDL_EVENT_WINDOW_MOVED: {
-                window_signal(_wndw, event.window);
+                message_window(_wndw, event.window);
             } break;
 
             case SDL_EVENT_KEY_DOWN:
             case SDL_EVENT_KEY_UP: {
-                keyboard_signal(_kybd, event.key);
+                message_keyboard(_kybd, event.key);
             } break;
 
             case SDL_EVENT_QUIT: {
@@ -104,7 +157,7 @@ namespace scent
         while ( update() ) {
             time += _clck.update();
 
-            while ( signal() ) {
+            while ( handle() ) {
                 if ( stage.input() == false )
                     stop();
             }
@@ -119,62 +172,4 @@ namespace scent
 
         stage.drop();
     }
-
-    void
-    window_signal(Window* window, SDL_WindowEvent event)
-    {
-        Window_Signal signal;
-
-        if ( window == 0 || window->code() != event.windowID)
-            return;
-
-        switch ( event.type ) {
-            case SDL_EVENT_WINDOW_SHOWN: {
-                signal.type = Window_Signal::SHOW;
-            } break;
-
-            case SDL_EVENT_WINDOW_HIDDEN: {
-                signal.type = Window_Signal::HIDE;
-            } break;
-
-            case SDL_EVENT_WINDOW_MOVED: {
-                signal.type   = Window_Signal::MOVE;
-                signal.coords = {event.data1, event.data2};
-            } break;
-
-            default: break;
-        }
-
-        // todo(trakot): read window from hash_map and update.
-
-        window->signal(signal);
-    }
-
-    void
-    keyboard_signal(Keyboard* keyboard, SDL_KeyboardEvent event)
-    {
-        Keyboard_Signal signal;
-
-        if ( keyboard == 0 ) return;
-
-        switch ( event.type ) {
-            case SDL_EVENT_KEY_DOWN: {
-                signal.type = Keyboard_Signal::DOWN;
-            } break;
-
-            case SDL_EVENT_KEY_UP: {
-                signal.type = Keyboard_Signal::UP;
-            } break;
-
-            default: break;
-        }
-
-        signal.code   = event.key;
-        signal.scan   = event.scancode;
-        signal.modifs = event.mod;
-        signal.repeat = event.repeat;
-
-        keyboard->signal(signal);
-    }
 } // scent
-

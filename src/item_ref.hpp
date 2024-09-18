@@ -41,19 +41,19 @@ namespace scent
          *
          */
         bool
-        exists() const;
+        is_valid() const;
 
         /**
          *
          */
         const Val&
-        val() const;
+        value() const;
 
         /**
          *
          */
         Val&
-        val();
+        value();
     };
 } // scent
 

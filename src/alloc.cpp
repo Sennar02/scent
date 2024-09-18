@@ -5,12 +5,11 @@
 namespace scent
 {
     bool
-    is_pow_2(u32 value)
+    is_pow_2(uptr value)
     {
-        u32 error = (value & (value - 1u));
+        uptr error = value & (value - 1u);
 
-        return value != 0 &&
-               error == 0;
+        return error == 0 && value != 0;
     }
 
     i8*
@@ -31,8 +30,8 @@ namespace scent
     {
         uptr value = (uptr) memory;
 
-        return (i8*) (
-            (state == 0) * value
-        );
+        value = (state == 0) * value;
+
+        return (i8*) value;
     }
 } // scent

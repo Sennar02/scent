@@ -1,6 +1,8 @@
 #ifndef SCENT_ARRAY_LIST_HPP
 #define SCENT_ARRAY_LIST_HPP
 
+#include <assert.h>
+
 #include "types.hpp"
 #include "slice.hpp"
 #include "alloc.hpp"
@@ -64,6 +66,30 @@ namespace scent
         /**
          *
          */
+        bool
+        is_empty() const;
+
+        /**
+         *
+         */
+        bool
+        isnt_empty() const;
+
+        /**
+         *
+         */
+        bool
+        is_full() const;
+
+        /**
+         *
+         */
+        bool
+        isnt_full() const;
+
+        /**
+         *
+         */
         u32
         size() const;
 
@@ -96,30 +122,6 @@ namespace scent
          */
         Slice<Val>
         values();
-
-        /**
-         *
-         */
-        bool
-        is_empty() const;
-
-        /**
-         *
-         */
-        bool
-        isnt_empty() const;
-
-        /**
-         *
-         */
-        bool
-        is_full() const;
-
-        /**
-         *
-         */
-        bool
-        isnt_full() const;
 
         /**
          *
@@ -209,12 +211,24 @@ namespace scent
          *
          */
         Item_Ref<const Val>
-        operator[](u32 index) const;
+        find(u32 index) const;
 
         /**
          *
          */
         Item_Ref<Val>
+        find(u32 index);
+
+        /**
+         *
+         */
+        const Val&
+        operator[](u32 index) const;
+
+        /**
+         *
+         */
+        Val&
         operator[](u32 index);
     };
 } // scent

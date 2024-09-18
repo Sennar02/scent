@@ -8,18 +8,18 @@
 #include "keyboard.hpp"
 #include "stage.hpp"
 #include "application.hpp"
-#include "emitter.hpp"
+#include "channel.hpp"
 
 using namespace scent;
 
 void
-keyboard_handler(Keyboard_Signal signal)
+keyboard_handler(Keyboard_Msg message)
 {
     const i8* names[] = {
         "down", "up",
     };
 
-    printf("[%s]\n", names[signal.type - 1u]);
+    printf("[%s]\n", names[message.type - 1u]);
 }
 
 struct Test_Stage
@@ -40,9 +40,10 @@ public:
         arena.init(malloc(8192u), 8192u);
 
         window.init("Prova", {640u, 360u});
-        window.init_emitter(arena, 32u);
+        window.init_channel(arena, 32u);
+
         keyboard.init();
-        keyboard.init_emitter(arena, 32u);
+        keyboard.init_channel(arena, 32u);
 
         app.init_window(window);
         app.init_keyboard(keyboard);
@@ -92,7 +93,7 @@ public:
     }
 };
 
-static Test_Stage  stage;
+static Test_Stage stage;
 static Application app;
 
 int

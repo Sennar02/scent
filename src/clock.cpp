@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <SDL3/SDL.h>
 
 #include "clock.hpp"
@@ -28,6 +29,8 @@ namespace scent
     {
         _time = _next;
         _next = SDL_GetTicks();
+
+        assert(_next >= _time && "Clock wrapped around");
 
         return (_next - _time) / 1000.0f;
     }

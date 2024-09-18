@@ -9,7 +9,7 @@ namespace scent
      *
      */
     bool
-    is_pow_2(u32 value);
+    is_pow_2(uptr value);
 
     /**
      *

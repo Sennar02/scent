@@ -29,7 +29,7 @@ namespace scent
 
     template <class Key, class Val>
     bool
-    Pair_Ref<Key, Val>::exists() const
+    Pair_Ref<Key, Val>::is_valid() const
     {
         return _key != 0;
     }
@@ -38,7 +38,7 @@ namespace scent
     const Key&
     Pair_Ref<Key, Val>::key() const
     {
-        assert(_key != 0 && "Key does not exist");
+        assert(_key != 0 && "The key does not exist");
 
         return *_key;
     }
@@ -47,25 +47,25 @@ namespace scent
     Key&
     Pair_Ref<Key, Val>::key()
     {
-        assert(_key != 0 && "Key does not exist");
+        assert(_key != 0 && "The key does not exist");
 
         return *_key;
     }
 
     template <class Key, class Val>
     const Val&
-    Pair_Ref<Key, Val>::val() const
+    Pair_Ref<Key, Val>::value() const
     {
-        assert(_val != 0 && "Val does not exist");
+        assert(_val != 0 && "The value does not exist");
 
         return *_val;
     }
 
     template <class Key, class Val>
     Val&
-    Pair_Ref<Key, Val>::val()
+    Pair_Ref<Key, Val>::value()
     {
-        assert(_val != 0 && "Val does not exist");
+        assert(_val != 0 && "The value does not exist");
 
         return *_val;
     }

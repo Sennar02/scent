@@ -4,7 +4,7 @@
 
 namespace scent
 {
-    Window_Signal::Window_Signal()
+    Window_Msg::Window_Msg()
         : type {UNDEF}
         , size {}
     {}
@@ -39,9 +39,9 @@ namespace scent
     }
 
     void
-    Window::init_emitter(Alloc& alloc, u32 size)
+    Window::init_channel(Alloc& alloc, u32 size)
     {
-        _emtr.init(alloc, size);
+        _chnl.init(alloc, size);
     }
 
     void
@@ -56,16 +56,7 @@ namespace scent
         _wndw = 0;
         _rndr = 0;
 
-        _emtr.drop();
-    }
-
-    u32
-    Window::code() const
-    {
-        if ( _wndw != 0 )
-            return SDL_GetWindowID(_wndw);
-
-        return 0;
+        _chnl.drop();
     }
 
     bool
@@ -91,6 +82,15 @@ namespace scent
         return coords;
     }
 
+    u32
+    Window::desc() const
+    {
+        if ( _wndw != 0 )
+            return SDL_GetWindowID(_wndw);
+
+        return 0;
+    }
+
     void
     Window::show()
     {
@@ -114,13 +114,13 @@ namespace scent
     {
         if ( _rndr == 0 ) return;
 
-        SDL_FRect fill = {rect.a, rect.b, rect.c, rect.d};
+        SDL_FRect area = {rect.a, rect.b, rect.c, rect.d};
 
         SDL_SetRenderDrawColor(_rndr,
             colour.a, colour.b, colour.c, colour.d
         );
 
-        SDL_RenderFillRect(_rndr, &fill);
+        SDL_RenderFillRect(_rndr, &area);
         SDL_SetRenderDrawColor(_rndr, 0, 0, 0, 0);
     }
 
@@ -129,14 +129,37 @@ namespace scent
     {
         if ( _rndr == 0 ) return;
 
-        SDL_FRect fill = {rect.a, rect.b, rect.c, rect.d};
+        SDL_FRect area = {rect.a, rect.b, rect.c, rect.d};
 
         SDL_SetRenderDrawColor(_rndr,
             colour.a, colour.b, colour.c, colour.d
         );
 
-        SDL_RenderRect(_rndr, &fill);
+        SDL_RenderRect(_rndr, &area);
         SDL_SetRenderDrawColor(_rndr, 0, 0, 0, 0);
+    }
+
+    void
+    Window::draw(Vec4<f32> rect, SDL_Surface& surface)
+    {
+        if ( _rndr == 0 ) return;
+
+        SDL_FRect    area = {rect.a, rect.b, rect.c, rect.d};
+        SDL_Texture* txtr =
+            SDL_CreateTextureFromSurface(_rndr, &surface);
+
+        SDL_RenderTexture(_rndr, txtr, 0, &area);
+    }
+
+    void
+    Window::draw(SDL_Surface& surface)
+    {
+        if ( _rndr == 0 ) return;
+
+        SDL_Texture* txtr =
+            SDL_CreateTextureFromSurface(_rndr, &surface);
+
+        SDL_RenderTexture(_rndr, txtr, 0, 0);
     }
 
     void
@@ -163,23 +186,23 @@ namespace scent
     }
 
     bool
-    Window::attach(void (*fptr) (Window_Signal))
+    Window::attach(void (*fptr) (Window_Msg))
     {
-        return _emtr.attach(fptr);
+        return _chnl.attach(fptr);
     }
 
     template <class Ctx>
     bool
-    Window::attach(void (*fptr) (Ctx&, Window_Signal), Ctx& self)
+    Window::attach(Ctx& self, void (*fptr) (Ctx&, Window_Msg))
     {
-        return _emtr.attach(fptr, self);
+        return _chnl.attach(self, fptr);
     }
 
     template <class Ctx>
     bool
-    Window::attach(void (*fptr) (const Ctx&, Window_Signal), Ctx& self)
+    Window::attach(Ctx& self, void (*fptr) (const Ctx&, Window_Msg))
     {
-        return _emtr.attach(fptr, self);
+        return _chnl.attach(self, fptr);
     }
 
     void
@@ -187,22 +210,22 @@ namespace scent
     {}
 
     void
-    Window::signal(const Window_Signal& signal)
+    Window::send(const Window_Msg& message)
     {
-        switch ( signal.type ) {
-            case Window_Signal::SHOW: {
+        switch ( message.type ) {
+            case Window_Msg::SHOW: {
                 _vsbl = true;
             } break;
 
-            case Window_Signal::HIDE: {
+            case Window_Msg::HIDE: {
                 _vsbl = false;
             } break;
 
-            case Window_Signal::MOVE:
-            case Window_Signal::UNDEF:
+            case Window_Msg::MOVE:
+            case Window_Msg::UNDEF:
                 break;
         }
 
-        _emtr.emit(signal);
+        _chnl.send(message);
     }
 } // scent

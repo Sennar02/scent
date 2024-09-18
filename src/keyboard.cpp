@@ -17,7 +17,7 @@ namespace scent
     static u8  states[KEY_COUNT];
     static u16 modifs[KEY_COUNT];
 
-    Keyboard_Signal::Keyboard_Signal()
+    Keyboard_Msg::Keyboard_Msg()
         : type   {UNDEF}
         , code   {0}
         , scan   {0}
@@ -42,9 +42,9 @@ namespace scent
     }
 
     void
-    Keyboard::init_emitter(Alloc& alloc, u32 size)
+    Keyboard::init_channel(Alloc& alloc, u32 size)
     {
-        _emtr.init(alloc, size);
+        _chnl.init(alloc, size);
     }
 
     void
@@ -53,7 +53,7 @@ namespace scent
         _states = 0;
         _modifs = 0;
 
-        _emtr.drop();
+        _chnl.drop();
     }
 
     bool
@@ -93,23 +93,23 @@ namespace scent
     }
 
     bool
-    Keyboard::attach(void (*fptr) (Keyboard_Signal))
+    Keyboard::attach(void (*fptr) (Keyboard_Msg))
     {
-        return _emtr.attach(fptr);
+        return _chnl.attach(fptr);
     }
 
     template <class Ctx>
     bool
-    Keyboard::attach(void (*fptr) (Ctx&, Keyboard_Signal), Ctx& self)
+    Keyboard::attach(Ctx& self, void (*fptr) (Ctx&, Keyboard_Msg))
     {
-        return _emtr.attach(fptr, self);
+        return _chnl.attach(self, fptr);
     }
 
     template <class Ctx>
     bool
-    Keyboard::attach(void (*fptr) (const Ctx&, Keyboard_Signal), Ctx& self)
+    Keyboard::attach(Ctx& self, void (*fptr) (const Ctx&, Keyboard_Msg))
     {
-        return _emtr.attach(fptr, self);
+        return _chnl.attach(self, fptr);
     }
 
     void
@@ -122,25 +122,25 @@ namespace scent
     }
 
     void
-    Keyboard::signal(const Keyboard_Signal& signal)
+    Keyboard::send(const Keyboard_Msg& message)
     {
-        u8 first = signal.repeat == 0;
+        u8 first = message.repeat == 0;
 
-        switch ( signal.type ) {
-            case Keyboard_Signal::DOWN: {
-                _states[signal.scan] = KEY_ACTIVE + KEY_CHANGE * first;
-                _modifs[signal.scan] = signal.modifs;
+        switch ( message.type ) {
+            case Keyboard_Msg::DOWN: {
+                _states[message.scan] = KEY_ACTIVE + KEY_CHANGE * first;
+                _modifs[message.scan] = message.modifs;
             } break;
 
-            case Keyboard_Signal::UP: {
-                _states[signal.scan] = KEY_CHANGE;
-                _modifs[signal.scan] = signal.modifs;
+            case Keyboard_Msg::UP: {
+                _states[message.scan] = KEY_CHANGE;
+                _modifs[message.scan] = message.modifs;
             } break;
 
-            case Keyboard_Signal::UNDEF:
+            case Keyboard_Msg::UNDEF:
                 break;
         }
 
-        _emtr.emit(signal);
+        _chnl.send(message);
     }
 } // scent

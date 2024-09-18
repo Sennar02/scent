@@ -1,35 +1,45 @@
-#ifndef SCENT_EMITTER_HPP
-#define SCENT_EMITTER_HPP
+#ifndef SCENT_CHANNEL_HPP
+#define SCENT_CHANNEL_HPP
 
 #include "types.hpp"
 #include "alloc.hpp"
 #include "array_list.hpp"
-#include "invoker.hpp"
 
 namespace scent
 {
-    template <class Sig>
-    using Handler = Invoker<void (Sig)>;
-
-    template <class Sig>
-    struct Emitter
+    template <class Msg>
+    struct Channel
     {
     private:
+        struct Pure {
+            i8* fptr;
+        };
+
+        struct Tied {
+            i8* fptr;
+            i8* self;
+        };
+
         /**
          *
          */
-        Array_List<Handler<Sig>> _list;
+        Array_List<Pure> _pure;
+
+        /**
+         *
+         */
+        Array_List<Tied> _tied;
 
     public:
         /**
          *
          */
-        Emitter();
+        Channel();
 
         /**
          *
          */
-        Emitter(Alloc& alloc, u32 size);
+        Channel(Alloc& alloc, u32 size);
 
         /**
          *
@@ -47,30 +57,30 @@ namespace scent
          *
          */
         bool
-        attach(void (*fptr) (Sig));
+        attach(void (*fptr) (Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (Ctx&, Sig), Ctx& self);
+        attach(Ctx& self, void (*fptr) (Ctx&, Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (const Ctx&, Sig), Ctx& self);
+        attach(const Ctx& self, void (*fptr) (const Ctx&, Msg));
 
         /**
          *
          */
         void
-        emit(const Sig& signal) const;
+        send(const Msg& message) const;
     };
 } // scent
 
-#include "emitter.inl"
+#include "channel.inl"
 
-#endif // SCENT_EMITTER_HPP
+#endif // SCENT_CHANNEL_HPP

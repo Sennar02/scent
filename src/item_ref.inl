@@ -27,25 +27,25 @@ namespace scent
 
     template <class Val>
     bool
-    Item_Ref<Val>::exists() const
+    Item_Ref<Val>::is_valid() const
     {
         return _val != 0;
     }
 
     template <class Val>
     const Val&
-    Item_Ref<Val>::val() const
+    Item_Ref<Val>::value() const
     {
-        assert(_val != 0 && "Val does not exist");
+        assert(_val != 0 && "The value does not exist");
 
         return *_val;
     }
 
     template <class Val>
     Val&
-    Item_Ref<Val>::val()
+    Item_Ref<Val>::value()
     {
-        assert(_val != 0 && "Val does not exist");
+        assert(_val != 0 && "The value does not exist");
 
         return *_val;
     }

@@ -2,11 +2,11 @@
 #define SCENT_KEYBOARD_HPP
 
 #include "types.hpp"
-#include "emitter.hpp"
+#include "channel.hpp"
 
 namespace scent
 {
-    struct Keyboard_Signal
+    struct Keyboard_Msg
     {
     public:
         enum Type
@@ -49,7 +49,7 @@ namespace scent
         /**
          *
          */
-        Keyboard_Signal();
+        Keyboard_Msg();
     };
 
     struct Keyboard
@@ -68,7 +68,7 @@ namespace scent
         /**
          *
          */
-        Emitter<Keyboard_Signal> _emtr;
+        Channel<Keyboard_Msg> _chnl;
 
     public:
         /**
@@ -86,7 +86,7 @@ namespace scent
          *
          */
         void
-        init_emitter(Alloc& alloc, u32 size);
+        init_channel(Alloc& alloc, u32 size);
 
         /**
          *
@@ -122,21 +122,21 @@ namespace scent
          *
          */
         bool
-        attach(void (*fptr) (Keyboard_Signal));
+        attach(void (*fptr) (Keyboard_Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (Ctx&, Keyboard_Signal), Ctx& self);
+        attach(Ctx& self, void (*fptr) (Ctx&, Keyboard_Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (const Ctx&, Keyboard_Signal), Ctx& self);
+        attach(Ctx& self, void (*fptr) (const Ctx&, Keyboard_Msg));
 
         /**
          *
@@ -148,7 +148,7 @@ namespace scent
          *
          */
         void
-        signal(const Keyboard_Signal& signal);
+        send(const Keyboard_Msg& message);
     };
 } // scent
 

@@ -41,7 +41,7 @@ namespace scent
     const Val&
     Slice<Val>::operator[](u32 index) const
     {
-        assert(index <  _size && "Index out of bounds");
+        assert(index < _size && "Index out of bounds");
 
         return _pntr[index];
     }
@@ -50,7 +50,7 @@ namespace scent
     Val&
     Slice<Val>::operator[](u32 index)
     {
-        assert(index <  _size && "Index out of bounds");
+        assert(index < _size && "Index out of bounds");
 
         return _pntr[index];
     }

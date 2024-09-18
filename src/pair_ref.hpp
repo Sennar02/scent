@@ -46,7 +46,7 @@ namespace scent
          *
          */
         bool
-        exists() const;
+        is_valid() const;
 
         /**
          *
@@ -64,13 +64,13 @@ namespace scent
          *
          */
         const Val&
-        val() const;
+        value() const;
 
         /**
          *
          */
         Val&
-        val();
+        value();
     };
 } // scent
 

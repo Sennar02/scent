@@ -5,14 +5,14 @@
 #include "vec2.hpp"
 #include "vec4.hpp"
 #include "colour.hpp"
-#include "emitter.hpp"
+#include "channel.hpp"
 
 struct SDL_Window;
 struct SDL_Renderer;
 
 namespace scent
 {
-    struct Window_Signal
+    struct Window_Msg
     {
     public:
         enum Type
@@ -53,7 +53,7 @@ namespace scent
         /**
          *
          */
-        Window_Signal();
+        Window_Msg();
     };
 
     struct Window
@@ -72,7 +72,7 @@ namespace scent
         /**
          *
          */
-        Emitter<Window_Signal> _emtr;
+        Channel<Window_Msg> _chnl;
 
         /**
          *
@@ -100,19 +100,13 @@ namespace scent
          *
          */
         void
-        init_emitter(Alloc& alloc, u32 size);
+        init_channel(Alloc& alloc, u32 size);
 
         /**
          *
          */
         void
         drop();
-
-        /**
-         *
-         */
-        u32
-        code() const;
 
         /**
          *
@@ -131,6 +125,12 @@ namespace scent
          */
         Vec2<i32>
         coords() const;
+
+        /**
+         *
+         */
+        u32
+        desc() const;
 
         /**
          *
@@ -166,6 +166,18 @@ namespace scent
          *
          */
         void
+        draw(Vec4<f32> rect, SDL_Surface& surface);
+
+        /**
+         *
+         */
+        void
+        draw(SDL_Surface& surface);
+
+        /**
+         *
+         */
+        void
         render();
 
         /**
@@ -178,21 +190,21 @@ namespace scent
          *
          */
         bool
-        attach(void (*fptr) (Window_Signal));
+        attach(void (*fptr) (Window_Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (Ctx&, Window_Signal), Ctx& self);
+        attach(Ctx& self, void (*fptr) (Ctx&, Window_Msg));
 
         /**
          *
          */
         template <class Ctx>
         bool
-        attach(void (*fptr) (const Ctx&, Window_Signal), Ctx& self);
+        attach(Ctx& self, void (*fptr) (const Ctx&, Window_Msg));
 
         /**
          *
@@ -204,7 +216,7 @@ namespace scent
          *
          */
         void
-        signal(const Window_Signal& signal);
+        send(const Window_Msg& message);
     };
 } // scent
 
