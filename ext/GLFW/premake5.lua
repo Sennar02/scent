@@ -2,31 +2,23 @@ project "GLFW"
     kind     "StaticLib"
     language "C"
 
+    targetdir "%{wks.location}/bin/%{prj.name}"
+    objdir    "%{wks.location}/obj/%{prj.name}"
+
     files {
-        "include/GLFW/glfw3.h",
-        "include/GLFW/glfw3native.h",
-
-        "src/internal.h",
-        "src/platform.h",
-        "src/mappings.h",
-        "src/null_joystick.h",
-        "src/null_platform.h",
-
         "src/context.c",
-        "src/init.c",
-        "src/input.c",
-        "src/window.c",
-        "src/monitor.c",
-        "src/platform.c",
-        "src/vulkan.c",
-
         "src/egl_context.c",
         "src/osmesa_context.c",
-
+        "src/init.c",
         "src/null_init.c",
+        "src/input.c",
         "src/null_joystick.c",
+        "src/window.c",
         "src/null_window.c",
+        "src/monitor.c",
         "src/null_monitor.c",
+        "src/platform.c",
+        "src/vulkan.c",
     }
 
     filter { "system:linux" }
@@ -51,9 +43,6 @@ project "GLFW"
 
     filter { "system:windows" }
         files {
-            "src/win32_time.h",
-            "src/win32_thread.h",
-
             "src/wgl_context.c",
             "src/egl_context.c",
             "src/osmesa_context.c",

@@ -1,44 +1,43 @@
-#ifndef CORE_ARENA_HPP
-#define CORE_ARENA_HPP
+#ifndef CORE_REGION_HPP
+#define CORE_REGION_HPP
 
 #include "assert.hpp"
 #include "types.hpp"
+#include "buffer.hpp"
 
 namespace core
 {
-    struct Block
-    {
-    public:
-        Block* next;
-        i8*    base;
-        i8*    curs;
-        u32    size;
-    };
+    struct Buffer_Node;
 
-    struct Arena
+    struct Region
     {
     private:
         /**
          *
          */
-        Block* _head = 0;
+        Buffer_Node* _list = 0;
+
+        /**
+         *
+         */
+        f32 _grow = 0.0f;
 
     public:
         /**
          *
          */
-        Arena();
+        Region();
 
         /**
          *
          */
-        Arena(u32 size);
+        Region(uarch size, f32 grow = 1.0f);
 
         /**
          *
          */
         void
-        init(u32 size);
+        init(uarch size, f32 grow = 1.0f);
 
         /**
          *
@@ -50,7 +49,7 @@ namespace core
          *
          */
         i8*
-        alloc(u32 size);
+        require(uarch size, u8 align);
 
         /**
          *
@@ -60,4 +59,4 @@ namespace core
     };
 } // namespace core
 
-#endif // CORE_ARENA_HPP
+#endif // CORE_REGION_HPP

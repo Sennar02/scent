@@ -2,11 +2,11 @@ project "glad"
     kind     "StaticLib"
     language "C"
 
+    targetdir "%{wks.location}/bin/%{prj.name}"
+    objdir    "%{wks.location}/obj/%{prj.name}"
+
     includedirs { "include"  }
 
     files {
-        "include/KHR/khrplatform.h",
-        "include/glad/glad.h",
-
         "src/glad.c",
     }

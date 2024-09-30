@@ -1,0 +1,13 @@
+/bin
+/obj
+
+# Make
+Makefile
+*.make
+
+# Visual Studio
+*.vs
+*.vcxproj*
+*.sln
+
+!.gitignore
