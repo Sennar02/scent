@@ -1,15 +1,21 @@
-#ifndef CORE_MEMORY_HPP
-#define CORE_MEMORY_HPP
+#ifndef GR_CORE_MEMORY_HPP
+#define GR_CORE_MEMORY_HPP
 
 #include "assert.hpp"
 #include "types.hpp"
-#include "buffer.hpp"
-#include "region.hpp"
+#include "arena.hpp"
 
-namespace core
+namespace gr
 {
-    i8*
-    align_forw(i8* pntr, u8 align);
-} // namespace core
+    template <class Val>
+    Val*
+    arena_alloc_type(Arena* self, isize count)
+    {
+        static const isize size = sizeof(Val);
+        static const isize algn = alignof(Val);
 
-#endif // CORE_MEMORY_HPP
+        return (Val*) arena_alloc(self, algn, size, count);
+    }
+} // namespace gr
+
+#endif // GR_CORE_MEMORY_HPP

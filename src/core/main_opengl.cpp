@@ -9,9 +9,9 @@
 #define LINE(x) \
     x "\n"
 
-using namespace core;
+using namespace gr;
 
-const i8* vert_module =
+const byte* vert_module =
     LINE("#version 330 core")
     LINE("")
     LINE("layout (location = 0) in vec4 vert_point;")
@@ -19,24 +19,25 @@ const i8* vert_module =
     LINE("")
     LINE("out vec4 frag_color;")
     LINE("")
-    LINE("void main() {")
+    LINE("void main()")
+    LINE("{")
     LINE(    "gl_Position = vert_point;")
     LINE(    "frag_color  = vert_color;")
     LINE("}");
 
-const i8* frag_module =
+const byte* frag_module =
     LINE("#version 330 core")
     LINE("")
-    LINE("in vec4 frag_color;")
-    LINE("")
+    LINE("in  vec4 frag_color;")
     LINE("out vec4 disp_color;")
     LINE("")
-    LINE("void main() {")
-    LINE(    "disp_color  = frag_color;")
+    LINE("void main()")
+    LINE("{")
+    LINE(    "disp_color = frag_color;")
     LINE("}");
 
 u32
-shader_module_init(u32 type, const i8* source)
+shader_module_init(u32 type, const byte* source)
 {
     u32 module = glCreateShader(type);
     i32 status = 0;
@@ -57,7 +58,7 @@ shader_module_init(u32 type, const i8* source)
 void
 shader_module_drop(u32 module)
 {
-    RUNTIME_ASSERT(module != 0, "The module does not exist");
+    gr_run_assert(module != 0, "The module does not exist");
 
     glDeleteShader(module);
 }
@@ -71,8 +72,8 @@ shader_init()
 void
 shader_give_module(u32 shader, u32 module)
 {
-    RUNTIME_ASSERT(shader != 0, "The shader does not exist");
-    RUNTIME_ASSERT(module != 0, "The module does not exist");
+    gr_run_assert(shader != 0, "The shader does not exist");
+    gr_run_assert(module != 0, "The module does not exist");
 
     glAttachShader(shader, module);
 }
@@ -82,7 +83,7 @@ shader_link(u32 shader)
 {
     i32 status = 0;
 
-    RUNTIME_ASSERT(shader != 0, "The shader does not exist");
+    gr_run_assert(shader != 0, "The shader does not exist");
 
     glLinkProgram(shader);
     glGetProgramiv(shader, GL_LINK_STATUS, &status);
@@ -93,7 +94,7 @@ shader_link(u32 shader)
 void
 shader_drop(u32 shader)
 {
-    RUNTIME_ASSERT(shader != 0, "The shader does not exist");
+    gr_run_assert(shader != 0, "The shader does not exist");
 
     glDeleteProgram(shader);
 }
@@ -134,7 +135,7 @@ main()
     if ( gladLoadGLLoader((GLADloadproc) &glfwGetProcAddress) == 0 )
         exit(EXIT_FAILURE);
 
-    glDebugMessageCallback((GLDEBUGPROC) ([](u32, u32, u32 value, u32, i32, const i8* error, const void*) {
+    glDebugMessageCallback((GLDEBUGPROC) ([](u32, u32, u32 value, u32, i32, const byte* error, const void*) {
         fprintf(stderr, "\x1b[31m[ERROR]\x1b[0m OpenGL(%i): %s\n", value, error);
     }), 0);
 
@@ -189,7 +190,7 @@ main()
     glUseProgram(shader);
 
     while ( glfwWindowShouldClose(window) == 0 ) {
-        glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glDrawArrays(GL_TRIANGLES, 0, 3);

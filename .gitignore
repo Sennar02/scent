@@ -1,12 +1,11 @@
-/bin
-/obj
+.*
+out/
 
 # Make
 Makefile
 *.make
 
 # Visual Studio
-*.vs
 *.vcxproj*
 *.sln
 

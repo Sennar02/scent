@@ -2,9 +2,6 @@ project "GLFW"
     kind     "StaticLib"
     language "C"
 
-    targetdir "%{wks.location}/bin/%{prj.name}"
-    objdir    "%{wks.location}/obj/%{prj.name}"
-
     files {
         "src/context.c",
         "src/egl_context.c",

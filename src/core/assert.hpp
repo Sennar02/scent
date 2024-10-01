@@ -1,12 +1,12 @@
-#ifndef CORE_ASSERT_HPP
-#define CORE_ASSERT_HPP
+#ifndef GR_CORE_ASSERT_HPP
+#define GR_CORE_ASSERT_HPP
 
 #include <assert.h>
 
-#define RUNTIME_ASSERT(test, mesg) \
+#define gr_run_assert(test, mesg) \
     assert((test) && mesg)
 
-#define COMPILE_ASSERT(test, mesg) \
+#define gr_cpl_assert(test, mesg) \
     static_assert(test, mesg)
 
-#endif // CORE_ASSERT_HPP
+#endif // GR_CORE_ASSERT_HPP

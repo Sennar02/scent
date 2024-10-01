@@ -3,19 +3,13 @@ project "core"
     language   "c++"
     cppdialect "c++11"
 
-    targetdir "%{wks.location}/bin/%{prj.name}"
-    objdir    "%{wks.location}/obj/%{prj.name}"
-
     files {
         "assert.hpp",
         "types.hpp",
-        "buffer.hpp",
-        "region.hpp",
+        "arena.hpp",
         "memory.hpp",
 
-        "buffer.cpp",
-        "region.cpp",
-        "memory.cpp",
+        "arena.cpp",
     }
 
     filter { "configurations:debug" }
@@ -28,9 +22,6 @@ project "opengl_test"
     kind       "consoleapp"
     language   "c++"
     cppdialect "c++11"
-
-    targetdir "%{wks.location}/bin/%{prj.name}"
-    objdir    "%{wks.location}/obj/%{prj.name}"
 
     includedirs {
         "../../ext/glad/include",
@@ -53,9 +44,6 @@ project "memory_test"
     kind       "consoleapp"
     language   "c++"
     cppdialect "c++11"
-
-    targetdir "%{wks.location}/bin/%{prj.name}"
-    objdir    "%{wks.location}/obj/%{prj.name}"
 
     includedirs {
         "../../ext/glad/include",
