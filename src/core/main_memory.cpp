@@ -7,11 +7,12 @@ using namespace gr;
 int
 main()
 {
-    Arena arena = arena_init(64);
-    i32*  block = (i32*) arena_alloc(&arena, alignof(i32), sizeof(i32), 4);
+    Arena arena = arena_init(64, 2.0f);
+    i32*  block = arena_alloc_of<i32>(&arena, 100);
 
     if ( block == 0 ) return 1;
 
-    for ( i32 i = 0; i < 4; i += 1 )
-        printf("%p\n", block + i);
+    printf("0x%llx\n", (usize) block);
+
+    arena_drop(&arena);
 }

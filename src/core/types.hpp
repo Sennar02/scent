@@ -5,11 +5,8 @@
 
 #include "assert.hpp"
 
-#define gr_type_size(type) \
-    sizeof(type)
-
-#define gr_type_align(type) \
-    alignof(type)
+#define gr_type_size(type)  ((isize)  sizeof(type))
+#define gr_type_align(type) ((isize) alignof(type))
 
 namespace gr
 {

@@ -9,13 +9,9 @@ namespace gr
 {
     template <class Val>
     Val*
-    arena_alloc_type(Arena* self, isize count)
-    {
-        static const isize size = sizeof(Val);
-        static const isize algn = alignof(Val);
-
-        return (Val*) arena_alloc(self, algn, size, count);
-    }
+    arena_alloc_of(Arena* arena, isize count);
 } // namespace gr
+
+#include "memory.inl"
 
 #endif // GR_CORE_MEMORY_HPP
