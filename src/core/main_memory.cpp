@@ -7,8 +7,10 @@ using namespace gr;
 int
 main()
 {
-    Arena arena = arena_init(64, ARENA_GROWTH_BASE);
-    i32*  block = arena_alloc_of<i32>(&arena, 100);
+    Arena arena = arena_init(SIZE_I32, 16, 0.0f);
+
+    i32* block = (i32*)
+        arena_alloc(&arena, ALIGN_I32, SIZE_I32, 17);
 
     if ( block == 0 ) return 1;
 

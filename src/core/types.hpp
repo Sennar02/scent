@@ -93,6 +93,30 @@ namespace gr
     gr_cpl_assert(SIZE_BYTE  == 1u, "Invalid type size");
 
     gr_cpl_assert(ALIGN_BYTE == 1u, "Invalid type size");
+
+    static const usize MAX_USIZE = UINTPTR_MAX;
+    static const u64   MAX_U64   = UINT64_MAX;
+    static const u32   MAX_U32   = UINT32_MAX;
+    static const u16   MAX_U16   = UINT16_MAX;
+    static const u8    MAX_U8    = UINT8_MAX;
+
+    static const usize MIN_USIZE = 0;
+    static const u64   MIN_U64   = 0;
+    static const u32   MIN_U32   = 0;
+    static const u16   MIN_U16   = 0;
+    static const u8    MIN_U8    = 0;
+
+    static const isize MAX_ISIZE = INTPTR_MAX;
+    static const i64   MAX_I64   = INT64_MAX;
+    static const i32   MAX_I32   = INT32_MAX;
+    static const i16   MAX_I16   = INT16_MAX;
+    static const i8    MAX_I8    = INT8_MAX;
+
+    static const isize MIN_ISIZE = INTPTR_MIN;
+    static const i64   MIN_I64   = INT64_MIN;
+    static const i32   MIN_I32   = INT32_MIN;
+    static const i16   MIN_I16   = INT16_MIN;
+    static const i8    MIN_I8    = INT8_MIN;
 } // namespace gr
 
 #endif // GR_CORE_TYPES_HPP

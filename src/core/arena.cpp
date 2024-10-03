@@ -6,11 +6,6 @@
 
 namespace gr
 {
-    static const byte* ARENA_ERROR_ARRAY[] = {
-        "GROWTH_BY_ZERO: The arena cannot grow because the next node would be empty",
-        "NO_MORE_MEMORY: The arena cannot grow because the system has run out of memory",
-    };
-
     byte*
     forw_align(byte* pntr, isize align)
     {
@@ -26,14 +21,20 @@ namespace gr
     }
 
     byte*
-    base_error_func(Arena* arena, isize error, const byte* descr)
+    base_error_func(void* ctxt, Arena* arena, isize error)
     {
         gr_run_assert(arena != 0, "The arena must exist");
-        gr_run_assert(descr != 0, "The error description must exist");
+        gr_run_assert(ctxt  == 0, "The context must not exist");
+
+        f32   grow_factor = arena->grow_factor;
 
         fprintf(stderr,
-            "\x1b[31m[ERROR]\x1b[0m From arena 0x%llx error %lli, %s\n",
-            (usize) arena, error, descr);
+            "\x1b[31m[ERROR]\x1b[0m from arena 0x%llx error %lli, %s:\n"
+            "\x1b[31m[ERROR]\x1b[0m     %s\n"
+            "\x1b[31m[ERROR]\x1b[0m\n"
+            "\x1b[31m[ERROR]\x1b[0m grow_factor = %f\n",
+            (usize) arena, error, ARENA_ERROR_NAME[error],
+            ARENA_ERROR_TITLE[error], grow_factor);
 
         return 0;
     }
@@ -70,6 +71,16 @@ namespace gr
         self.next = 0;
     }
 
+    isize
+    arena_node_size(Arena_Node* node)
+    {
+        gr_run_assert(node != 0, "The node must exist");
+
+        auto& self = *node;
+
+        return (isize) (self.tail - self.head);
+    }
+
     byte*
     arena_node_alloc(Arena_Node* node, isize align, isize size, isize count)
     {
@@ -88,12 +99,11 @@ namespace gr
         isize diff = self.tail - self.head;
         isize fill = curr - self.curr;
 
-        // todo(trakot_02): detect overflow.
-        if ( diff >= size * count + fill ) {
-            self.curr = curr + size;
+        if ( count <= (diff - fill) / size ) {
+            self.curr = curr + size * count;
             pntr      = curr;
 
-            memset(curr, 0, size);
+            memset(curr, 0, size * count);
         }
 
         return pntr;
@@ -110,25 +120,39 @@ namespace gr
     }
 
     Arena_Node*
-    arena_attach(isize size)
+    arena_attach(Arena* arena, isize size)
     {
-        // todo(trakot_02): find a prettier implementation.
-        // todo(trakot_02): detect overflow.
-        auto* node = (Arena_Node*) malloc(size + SIZE_ARENA_NODE);
-        byte* pntr = (byte*) node + SIZE_ARENA_NODE;
+        gr_run_assert(arena != 0, "The arena must exist");
 
-        if ( node != 0 )
-            *node = arena_node_init(pntr, size);
+        auto& self = *arena;
 
-        return node;
+        if ( size <= MAX_ISIZE - SIZE_ARENA_NODE ) {
+            byte* temp = alloc_request(&self.allocator,
+                ALIGN_ARENA_NODE, size + SIZE_ARENA_NODE, 1);
+
+            auto* node = (Arena_Node*)temp;
+            auto* pntr = temp + SIZE_ARENA_NODE;
+
+            if ( node != 0 )
+                *node = arena_node_init(pntr, size);
+
+            return node;
+        }
+
+        return 0;
     }
 
     void
-    arena_detach(Arena_Node* node)
+    arena_detach(Arena* arena, Arena_Node* node)
     {
-        gr_run_assert(node != 0, "The node must exist");
+        gr_run_assert(arena != 0, "The arena must exist");
+        gr_run_assert(node  != 0, "The node must exist");
 
-        free(node);
+        auto& self = *arena;
+        isize size = (isize) (node->tail - node->head);
+
+        alloc_release(&self.allocator,
+            (byte*) node, size + SIZE_ARENA_NODE, 1);
     }
 
     byte*
@@ -137,30 +161,34 @@ namespace gr
         gr_run_assert(arena != 0, "The arena must exist");
 
         auto& self = *arena;
+        auto* func = (Arena_Error_Func*) self.error_func;
 
-        if ( self.func != 0 && error != 0 ) {
-            const byte* descr = ARENA_ERROR_ARRAY[error - 1];
-
-            return ((Arena_Error_Func*) self.func)
-                (arena, error, descr);
-        }
+        if ( self.error_func != 0 && error != 0 )
+            return (*func)(self.error_ctxt, arena, error - 1);
 
         return 0;
     }
 
     Arena
-    arena_init(isize size, f32 growth)
+    arena_init(isize size, isize count, f32 grow_factor)
     {
         Arena self = {0};
         byte* pntr = 0;
 
+        gr_run_assert(grow_factor >= 0.0f,
+            "The grow factor must be positive or zero");
+
         gr_run_assert(size > 0, "The size must be positive");
 
-        self.list = arena_attach(size);
+        self.allocator  = base_alloc_init();
+        self.error_func = (byte*) &base_error_func;
+        self.error_ctxt = 0;
 
-        if ( self.list != 0 ) {
-            self.growth = (growth >= 2.0f) * growth;
-            self.func   = (byte*) BASE_ERROR_FUNC;
+        if ( count <= MAX_ISIZE / size ) {
+            self.list = arena_attach(&self, size * count);
+
+            if ( self.list != 0 )
+                self.grow_factor = grow_factor;
         }
 
         return self;
@@ -179,11 +207,11 @@ namespace gr
             temp = node;
             node = node->next;
 
-            arena_detach(temp);
+            arena_detach(arena, temp);
         }
 
-        self.list   = 0;
-        self.growth = 0.0f;
+        self.list        = 0;
+        self.grow_factor = 0.0f;
     }
 
     byte*
@@ -199,15 +227,20 @@ namespace gr
         byte* pntr = arena_node_alloc(node, align, size, count);
 
         while ( pntr == 0 ) {
+            if ( self.grow_factor == ARENA_GROW_NONE )
+                return arena_error(arena, ARENA_ERROR_UNABLE_TO_GROW);
+
             isize diff = node->tail - node->head;
-            // todo(trakot_02): detect overflow.
-            isize grow = (isize) (diff * self.growth);
+            isize grow = 0;
+
+            if ( diff <= (isize) (MAX_ISIZE / self.grow_factor) )
+                grow = (isize) (diff * self.grow_factor);
 
             if ( node->next == 0 ) {
-                if ( grow <= 0 )
-                    return arena_error(arena, ARENA_ERROR_GROWTH_BY_ZERO);
+                if ( count > grow / size && grow <= diff )
+                    return arena_error(arena, ARENA_ERROR_UNABLE_TO_GROW);
 
-                node->next = arena_attach(grow);
+                node->next = arena_attach(arena, grow);
 
                 if ( node->next == 0 )
                     return arena_error(arena, ARENA_ERROR_NO_MORE_MEMORY);
@@ -238,15 +271,29 @@ namespace gr
     }
 
     Arena_Error_Func*
-    arena_set_error_func(Arena* arena, Arena_Error_Func* func)
+    arena_set_error_func(Arena* arena, void* ctxt, Arena_Error_Func* func)
     {
         gr_run_assert(arena != 0, "The arena must exist");
 
         auto& self = *arena;
-        auto* temp = self.func;
+        auto* temp = self.error_func;
 
-        self.func = (byte*) func;
+        self.error_func = (byte*) func;
+        self.error_ctxt = (byte*) ctxt;
 
         return (Arena_Error_Func*) temp;
+    }
+
+    Alloc
+    arena_set_allocator(Arena* arena, Alloc allocator)
+    {
+        gr_run_assert(arena != 0, "The arena must exist");
+
+        auto& self = *arena;
+        auto  temp = self.allocator;
+
+        self.allocator = allocator;
+
+        return temp;
     }
 } // namespace gr
