@@ -5,6 +5,12 @@
 
 namespace gr
 {
+    //
+    //
+    //
+    byte*
+    forw_align(byte* pntr, isize align);
+
     struct Arena_Node {
         //
         //
@@ -27,12 +33,6 @@ namespace gr
         Arena_Node* next;
     };
 
-    static const isize SIZE_ARENA_NODE  = gr_type_size(Arena_Node);
-    static const isize ALIGN_ARENA_NODE = gr_type_align(Arena_Node);
-
-    gr_cpl_assert(SIZE_ARENA_NODE  == 4 * SIZE_ISIZE, "Unexpected type size");
-    gr_cpl_assert(ALIGN_ARENA_NODE == 1 * SIZE_ISIZE, "Unexpected type alignment");
-
     struct Arena {
         //
         //
@@ -42,20 +42,46 @@ namespace gr
         //
         //
         //
-        f32 grow;
+        byte* func;
+
+        //
+        //
+        //
+        f32 growth;
     };
 
-    static const isize SIZE_ARENA  = gr_type_size(Arena);
-    static const isize ALIGN_ARENA = gr_type_align(Arena);
+    //
+    //
+    //
+    using Arena_Error_Func = byte*
+        (Arena* self, isize code, const byte* message);
 
-    gr_cpl_assert(SIZE_ARENA  == 2 * SIZE_ISIZE, "Unexpected type size");
-    gr_cpl_assert(ALIGN_ARENA == 1 * SIZE_ISIZE, "Unexpected type alignment");
+    static const isize SIZE_ARENA_NODE = gr_type_size(Arena_Node);
+    static const isize SIZE_ARENA      = gr_type_size(Arena);
 
-    //
-    //
-    //
+    gr_cpl_assert(SIZE_ARENA_NODE == 4 * SIZE_ISIZE, "Unexpected type size");
+    gr_cpl_assert(SIZE_ARENA      == 3 * SIZE_ISIZE, "Unexpected type size");
+
+    static const isize ALIGN_ARENA_NODE = gr_type_align(Arena_Node);
+    static const isize ALIGN_ARENA      = gr_type_align(Arena);
+
+    gr_cpl_assert(ALIGN_ARENA_NODE == 1 * ALIGN_ISIZE, "Unexpected type alignment");
+    gr_cpl_assert(ALIGN_ARENA      == 1 * ALIGN_ISIZE, "Unexpected type alignment");
+
+    static const f32 ARENA_GROWTH_NONE = 0.0f;
+    static const f32 ARENA_GROWTH_BASE = 2.0f;
+
+    static const isize ARENA_ERROR_GROWTH_BY_ZERO = 1;
+    static const isize ARENA_ERROR_NO_MORE_MEMORY = 2;
+
+    static const isize ARENA_ERROR_COUNT =
+        ARENA_ERROR_NO_MORE_MEMORY;
+
     byte*
-    forw_align(byte* pntr, isize align);
+    base_error_func(Arena* arena, isize error, const byte* descr);
+
+    static const Arena_Error_Func* BASE_ERROR_FUNC =
+        &base_error_func;
 
     //
     //
@@ -104,6 +130,12 @@ namespace gr
     //
     void
     arena_reset(Arena* self);
+
+    //
+    //
+    //
+    Arena_Error_Func*
+    arena_set_error_func(Arena* self, Arena_Error_Func* func);
 } // namespace gr
 
 #endif // GR_CORE_ARENA_HPP
