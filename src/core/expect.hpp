@@ -3,10 +3,10 @@
 
 #include <assert.h>
 
-#define gr_run_assert(test, mesg) \
+#define gr_expect(test, mesg) \
     assert((test) && mesg)
 
-#define gr_cpl_assert(test, mesg) \
+#define gr_expectc(test, mesg) \
     static_assert(test, mesg)
 
 #endif // GR_CORE_ASSERT_HPP

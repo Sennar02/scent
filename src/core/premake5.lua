@@ -6,9 +6,13 @@ project "core"
     files {
         "assert.hpp",
         "types.hpp",
+        "alloc.hpp",
         "arena.hpp",
+        "slice.hpp",
+        "slice.inl",
         "memory.hpp",
 
+        "alloc.cpp",
         "arena.cpp",
     }
 

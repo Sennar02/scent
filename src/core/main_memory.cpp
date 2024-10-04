@@ -4,17 +4,32 @@
 
 using namespace gr;
 
+static const Array<i32, 5> ARRAY =
+     {1, 2, 3, 4, 5};
+
 int
 main()
 {
-    Arena arena = arena_init(SIZE_I32, 16, 0.0f);
+    Arena arena = arena_init(WIDTH_I32, 16, 4.0f);
 
-    i32* block = (i32*)
-        arena_alloc(&arena, ALIGN_I32, SIZE_I32, 17);
+    Slice<const i32> slice = slice_init<const i32>(&arena, 17);
 
-    if ( block == 0 ) return 1;
+    printf("slice:\n");
+    for ( isize i = 1; i <= slice.items; i += 1 )
+        printf("%2lli. %i\n", i, slice[i]);
 
-    printf("0x%llx\n", (usize) block);
+    printf("\narray:\n");
+    for ( isize i = 1; i <= ARRAY.items; i += 1 )
+        printf("%2lli. %i\n", i, ARRAY[i]);
+
+    slice = slice_from(&ARRAY);
+
+    arena_reset(&arena);
+    slice_clear(&slice);
+
+    printf("\nslice:\n");
+    for ( isize i = 1; i <= slice.items; i += 1 )
+        printf("%2lli. %i\n", i, slice[i]);
 
     arena_drop(&arena);
 }

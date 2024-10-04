@@ -5,55 +5,54 @@
 namespace gr
 {
     byte*
-    base_request(void* ctxt, isize align, isize size, isize count)
+    alloc_request(Alloc* alloc, isize align, isize width, isize items)
     {
-        gr_run_assert(ctxt == 0, "The context must not exist");
+        gr_expect(alloc != 0, "The allocator must exist");
+        gr_expect(align  > 0, "The alignment must be positive");
+        gr_expect(width  > 0, "The width must be positive");
 
-        return (byte*) calloc(count, size);
+        auto& self = *alloc;
+
+        return ((Request_Func*) self.request_func)
+            (self.alloc_ctxt, align, width, items);
     }
 
     void
-    base_release(void* ctxt, byte* pntr, isize size, isize count)
+    alloc_release(Alloc* alloc, byte* block, isize width, isize items)
     {
-        gr_run_assert(ctxt == 0, "The context must not exist");
+        gr_expect(alloc != 0, "The allocator must exist");
+        gr_expect(width  > 0, "The width must be positive");
 
-        free(pntr);
+        auto& self = *alloc;
+
+        return ((Release_Func*) self.release_func)
+            (self.alloc_ctxt, block, width, items);
+    }
+
+    byte*
+    base_request(void* ctxt, isize align, isize width, isize items)
+    {
+        gr_expect(ctxt == 0, "The context must not exist");
+
+        return (byte*) calloc(items, width);
+    }
+
+    void
+    base_release(void* ctxt, byte* block, isize width, isize items)
+    {
+        gr_expect(ctxt == 0, "The context must not exist");
+
+        free(block);
     }
 
     Alloc
     base_alloc_init()
     {
-        Alloc self = {0};
+        Alloc self;
 
         self.request_func = (byte*) &base_request;
         self.release_func = (byte*) &base_release;
-        self.alloc_ctxt   = 0;
 
         return self;
-    }
-
-    byte*
-    alloc_request(Alloc* alloc, isize align, isize size, isize count)
-    {
-        gr_run_assert(alloc != 0, "The allocator must exist");
-        gr_run_assert(align  > 0, "The alignment must be positive");
-        gr_run_assert(size   > 0, "The size must be positive");
-
-        auto& self = *alloc;
-
-        return ((Request_Func*) self.request_func)
-            (self.alloc_ctxt, align, size, count);
-    }
-
-    void
-    alloc_release(Alloc* alloc, byte* pntr, isize size, isize count)
-    {
-        gr_run_assert(alloc != 0, "The allocator must exist");
-        gr_run_assert(size   > 0, "The size must be positive");
-
-        auto& self = *alloc;
-
-        return ((Release_Func*) self.release_func)
-            (self.alloc_ctxt, pntr, size, count);
     }
 } // namespace gr
