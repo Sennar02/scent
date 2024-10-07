@@ -4,14 +4,14 @@ project "core"
     cppdialect "c++11"
 
     files {
-        "assert.hpp",
+        "expect.hpp",
         "types.hpp",
         "alloc.hpp",
         "arena.hpp",
+        "buffer.hpp",
         "slice.hpp",
-        "slice.inl",
-        "memory.hpp",
 
+        "buffer.cpp",
         "alloc.cpp",
         "arena.cpp",
     }

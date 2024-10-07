@@ -8,6 +8,12 @@
 #define gr_type_width(type) ((isize)  sizeof(type))
 #define gr_type_align(type) ((isize) alignof(type))
 
+#define gr_max(x, y) \
+    (((x) < (y)) * (y) + ((y) <= (x)) * (x))
+
+#define gr_min(x, y) \
+    (((x) < (y)) * (x) + ((y) <= (x)) * (y))
+
 namespace gr
 {
     using usize = uintptr_t;
@@ -27,8 +33,8 @@ namespace gr
 
     using byte = char;
 
-    static const isize ALIGN_MAX = 16u;
-    static const isize ALIGN_MIN = 1u;
+    static const isize ALIGN_MAX = 16;
+    static const isize ALIGN_MIN = 1;
 
     static const isize WIDTH_USIZE = gr_type_width(usize);
     static const isize WIDTH_U64   = gr_type_width(u64);
@@ -42,15 +48,15 @@ namespace gr
     static const isize ALIGN_U16   = gr_type_align(u16);
     static const isize ALIGN_U8    = gr_type_align(u8);
 
-    gr_expectc(WIDTH_U64 == 8u, "Invalid type width");
-    gr_expectc(WIDTH_U32 == 4u, "Invalid type width");
-    gr_expectc(WIDTH_U16 == 2u, "Invalid type width");
-    gr_expectc(WIDTH_U8  == 1u, "Invalid type width");
+    gr_cmpl_expect(WIDTH_U64 == 8, "Invalid type width");
+    gr_cmpl_expect(WIDTH_U32 == 4, "Invalid type width");
+    gr_cmpl_expect(WIDTH_U16 == 2, "Invalid type width");
+    gr_cmpl_expect(WIDTH_U8  == 1, "Invalid type width");
 
-    gr_expectc(ALIGN_U64 == 8u, "Invalid type alignment");
-    gr_expectc(ALIGN_U32 == 4u, "Invalid type alignment");
-    gr_expectc(ALIGN_U16 == 2u, "Invalid type alignment");
-    gr_expectc(ALIGN_U8  == 1u, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_U64 == 8, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_U32 == 4, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_U16 == 2, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_U8  == 1, "Invalid type alignment");
 
     static const isize WIDTH_ISIZE = gr_type_width(isize);
     static const isize WIDTH_I64   = gr_type_width(i64);
@@ -64,15 +70,15 @@ namespace gr
     static const isize ALIGN_I16   = gr_type_align(i16);
     static const isize ALIGN_I8    = gr_type_align(i8);
 
-    gr_expectc(WIDTH_I64 == 8u, "Invalid type width");
-    gr_expectc(WIDTH_I32 == 4u, "Invalid type width");
-    gr_expectc(WIDTH_I16 == 2u, "Invalid type width");
-    gr_expectc(WIDTH_I8  == 1u, "Invalid type width");
+    gr_cmpl_expect(WIDTH_I64 == 8, "Invalid type width");
+    gr_cmpl_expect(WIDTH_I32 == 4, "Invalid type width");
+    gr_cmpl_expect(WIDTH_I16 == 2, "Invalid type width");
+    gr_cmpl_expect(WIDTH_I8  == 1, "Invalid type width");
 
-    gr_expectc(ALIGN_I64 == 8u, "Invalid type alignment");
-    gr_expectc(ALIGN_I32 == 4u, "Invalid type alignment");
-    gr_expectc(ALIGN_I16 == 2u, "Invalid type alignment");
-    gr_expectc(ALIGN_I8  == 1u, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_I64 == 8, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_I32 == 4, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_I16 == 2, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_I8  == 1, "Invalid type alignment");
 
     static const isize WIDTH_F64 = gr_type_width(f64);
     static const isize WIDTH_F32 = gr_type_width(f32);
@@ -80,17 +86,17 @@ namespace gr
     static const isize ALIGN_F64 = gr_type_align(f64);
     static const isize ALIGN_F32 = gr_type_align(f32);
 
-    gr_expectc(WIDTH_F64 == 8u, "Invalid type width");
-    gr_expectc(WIDTH_F32 == 4u, "Invalid type width");
+    gr_cmpl_expect(WIDTH_F64 == 8, "Invalid type width");
+    gr_cmpl_expect(WIDTH_F32 == 4, "Invalid type width");
 
-    gr_expectc(ALIGN_F64 == 8u, "Invalid type alignment");
-    gr_expectc(ALIGN_F32 == 4u, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_F64 == 8, "Invalid type alignment");
+    gr_cmpl_expect(ALIGN_F32 == 4, "Invalid type alignment");
 
     static const isize WIDTH_BYTE = gr_type_width(byte);
     static const isize ALIGN_BYTE = gr_type_align(byte);
 
-    gr_expectc(WIDTH_BYTE == 1u, "Invalid type width");
-    gr_expectc(ALIGN_BYTE == 1u, "Invalid type alignment");
+    gr_cmpl_expect(WIDTH_BYTE == 1, "Invalid type width");
+    gr_cmpl_expect(ALIGN_BYTE == 1, "Invalid type alignment");
 
     static const usize MAX_USIZE = UINTPTR_MAX;
     static const u64   MAX_U64   = UINT64_MAX;

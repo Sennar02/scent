@@ -38,20 +38,20 @@ namespace gr
     static const isize WIDTH_ALLOC = gr_type_width(Alloc);
     static const isize ALIGN_ALLOC = gr_type_align(Alloc);
 
-    gr_expectc(WIDTH_ALLOC == 3 * WIDTH_ISIZE, "Unexpected type width");
-    gr_expectc(ALIGN_ALLOC == 1 * ALIGN_ISIZE, "Unexpected type alignment");
+    gr_cmpl_expect(WIDTH_ALLOC == 3 * WIDTH_ISIZE, "Unexpected type width");
+    gr_cmpl_expect(ALIGN_ALLOC == 1 * ALIGN_ISIZE, "Unexpected type alignment");
 
     //
     //
     //
     byte*
-    alloc_request(Alloc* self, isize align, isize width, isize items);
+    alloc_request(Alloc* alloc, isize align, isize width, isize items);
 
     //
     //
     //
     void
-    alloc_release(Alloc* self, byte* block, isize width, isize items);
+    alloc_release(Alloc* alloc, byte* block, isize width, isize items);
 
     //
     //

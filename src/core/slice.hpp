@@ -1,8 +1,9 @@
 #ifndef GR_CORE_SLICE_HPP
 #define GR_CORE_SLICE_HPP
 
-#include "expect.hpp"
 #include "types.hpp"
+#include "arena.hpp"
+#include "buffer.hpp"
 
 namespace gr
 {
@@ -66,37 +67,518 @@ namespace gr
     //
     template <class Val, isize Len>
     Slice<Val>
-    slice_from(Array<Val, Len>* array);
+    slice_from(Array<Val, Len>& array);
 
     //
     //
     //
     template <class Val, isize Len>
-    Slice<const Val>
-    slice_from(const Array<Val, Len>* array);
+    Slice<Val>
+    slice_from(const Array<Val, Len>& array);
 
     //
     //
     //
     template <class Val>
     Slice<Val>
-    slice_init(Arena* arena, isize size);
+    slice_copy(Slice<Val>* other, Arena* arena);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_drop(Slice<Val>* slice);
 
     //
     //
     //
     template <class Val>
     void
-    slice_drop(Slice<Val>* self);
+    slice_clear(Slice<Val>* slice);
 
     //
     //
     //
     template <class Val>
+    Slice<Val>
+    slice_resize(Slice<Val>* slice, Arena* arena, isize items);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, isize items, const Val& value);
+
+    //
+    //
+    //
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, Slice<Val>* other);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_remove(Slice<Val>* slice, isize index, isize items);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, isize items, const Val& value);
+
+    //
+    //
+    //
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, Slice<Val>* other);
+
+    //
+    //
+    //
+    template <class Val>
+    Slice<Val>
+    slice_pull(Slice<Val>* slice, isize index, isize items);
+
+    //
+    //
+    // Implementation.
+    //
+    //
+
+    template <class Val, isize Len>
+    const Val&
+    Array<Val, Len>::operator[](isize index) const
+    {
+        gr_exec_expect(0 < index && index <= items,
+            "The index must be in range");
+
+        return data[index - 1];
+    }
+
+    template <class Val, isize Len>
+    Val&
+    Array<Val, Len>::operator[](isize index)
+    {
+        gr_exec_expect(0 < index && index <= items,
+            "The index must be in range");
+
+        return data[index - 1];
+    }
+
+    template <class Val>
+    const Val&
+    Slice<Val>::operator[](isize index) const
+    {
+        gr_exec_expect(0 < index && index <= items,
+            "The index must be in range");
+
+        return data[index - 1];
+    }
+
+    template <class Val>
+    Val&
+    Slice<Val>::operator[](isize index)
+    {
+        gr_exec_expect(0 < index && index <= items,
+            "The index must be in range");
+
+        return data[index - 1];
+    }
+
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_from(Array<Val, Len>& array)
+    {
+        Slice<Val> self;
+
+        self.data  = array.data;
+        self.items = array.items;
+        self.limit = array.items;
+
+        return self;
+    }
+
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_from(const Array<Val, Len>& array)
+    {
+        Slice<Val> self;
+
+        self.data  = array.data;
+        self.items = array.items;
+        self.limit = array.items;
+
+        return self;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_copy(Slice<Val>* other, Arena* arena)
+    {
+        static const isize WIDTH_VAL = gr_type_width(Val);
+        static const isize ALIGN_VAL = gr_type_align(Val);
+
+        gr_exec_expect(other != 0, "The other slice must exist");
+
+        Slice<Val> self;
+
+        byte*  data = arena_alloc(arena,
+            ALIGN_VAL, WIDTH_VAL, other->limit);
+
+        if ( data != 0 ) {
+            isize bytes = WIDTH_VAL * other->items;
+            auto  bufr  = buffer_init(data, bytes);
+
+            buffer_write(&bufr, (byte*) other->data, bytes);
+
+            self.data  = (Val*) data;
+            self.items = other->items;
+            self.limit = other->limit;
+        }
+
+        return self;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_drop(Slice<Val>* slice)
+    {
+        gr_exec_except(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+
+        self.data  = 0;
+        self.items = 0;
+        self.limit = 0;
+    }
+
+    template <class Val>
     void
-    slice_clear(Slice<Val>* self);
+    slice_clear(Slice<Val>* slice)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+
+        self.items = 0;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_resize(Slice<Val>* slice, Arena* arena, isize items)
+    {
+        static const isize WIDTH_VAL = gr_type_width(Val);
+        static const isize ALIGN_VAL = gr_type_align(Val);
+
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+        auto* data = (byte*) self.data;
+
+        if ( self.limit >= items ) return self;
+
+        Slice<Val> resl = {};
+
+        data = arena_resize(arena, data,
+            ALIGN_VAL, WIDTH_VAL, items);
+
+        if ( data != 0 ) {
+            resl.data  = (Val*) data;
+            resl.items = self.items;
+            resl.limit = items;
+        }
+
+        return resl;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, isize items, const Val& value)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = resl.items - 1; i >= index; i -= 1 )
+            resl.data[i + items] = resl.data[i];
+
+        for ( isize i = 0; i < items; i += 1 )
+            resl.data[i + index] = value;
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize items = array.items;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = resl.items - 1; i >= index; i -= 1 )
+            resl.data[i + items] = resl.data[i];
+
+        for ( isize i = 0; i < items; i += 1 )
+            resl.data[i + index] = array[i + 1];
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, Slice<Val>* other)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+        gr_exec_expect(other != 0, "The other slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize items = other->items;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = resl.items - 1; i >= index; i -= 1 )
+            resl.data[i + items] = resl.data[i];
+
+        for ( isize i = 0; i < items; i += 1 )
+            resl.data[i + index] = other->data[i];
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_remove(Slice<Val>* slice, isize index, isize items)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+
+        if ( items < 1 || items > self.items ) return self;
+        if ( index < 1 || index > self.items ) return self;
+
+        index       = index - 1;
+        self.items -= items;
+
+        for ( isize i = index; i <= self.items; i += 1 )
+            self.data[i] = self.data[i + items];
+
+        return self;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, isize items, const Val& value)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = 0; i < items; i += 1 ) {
+            isize j = items - i - 1;
+
+            resl.data[j + resl.items] = resl.data[i + index];
+            resl.data[i + index]      = value;
+        }
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val, isize Len>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize items = array.items;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = 0; i < items; i += 1 ) {
+            isize j = items - i - 1;
+
+            resl.data[j + resl.items] = resl.data[i + index];
+            resl.data[i + index]      = array[i + 1];
+        }
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, Slice<Val>* other)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+        gr_exec_expect(other != 0, "The other slice must exist");
+
+        auto& self  = *slice;
+        auto  resl  = self;
+        isize items = other->items;
+        isize extra = gr_max(resl.limit, items);
+
+        if ( index < 1 || index - 1 > resl.items || items < 1 )
+            return resl;
+
+        index = index - 1;
+
+        if ( resl.limit - items < resl.items ) {
+            if ( MAX_ISIZE - extra < resl.limit || arena == 0 )
+                return resl;
+
+            resl = slice_resize(slice, arena, resl.limit + extra);
+
+            if ( resl.data == 0 )
+                return resl;
+        }
+
+        for ( isize i = 0; i < items; i += 1 ) {
+            isize j = items - i - 1;
+
+            resl.data[j + resl.items] = resl.data[i + index];
+            resl.data[i + index]      = other->data[i];
+        }
+
+        resl.items += items;
+
+        return resl;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_pull(Slice<Val>* slice, isize index, isize items)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+
+        if ( items < 1 || items > self.items ) return self;
+        if ( index < 1 || index > self.items ) return self;
+
+        index       = index - 1;
+        self.items -= items;
+
+        for ( isize i = 0; i < items; i += 1 ) {
+            isize j = items - i - 1;
+
+            self.data[i + index] = self.data[j + self.items];
+        }
+
+        return self;
+    }
 } // namespace gr
-
-#include "slice.inl"
 
 #endif // GR_CORE_SLICE_HPP

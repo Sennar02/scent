@@ -7,9 +7,9 @@ namespace gr
     byte*
     alloc_request(Alloc* alloc, isize align, isize width, isize items)
     {
-        gr_expect(alloc != 0, "The allocator must exist");
-        gr_expect(align  > 0, "The alignment must be positive");
-        gr_expect(width  > 0, "The width must be positive");
+        gr_exec_expect(alloc != 0, "The allocator must exist");
+        gr_exec_expect(align  > 0, "The alignment must be positive");
+        gr_exec_expect(width  > 0, "The width must be positive");
 
         auto& self = *alloc;
 
@@ -20,8 +20,8 @@ namespace gr
     void
     alloc_release(Alloc* alloc, byte* block, isize width, isize items)
     {
-        gr_expect(alloc != 0, "The allocator must exist");
-        gr_expect(width  > 0, "The width must be positive");
+        gr_exec_expect(alloc != 0, "The allocator must exist");
+        gr_exec_expect(width  > 0, "The width must be positive");
 
         auto& self = *alloc;
 
@@ -32,7 +32,7 @@ namespace gr
     byte*
     base_request(void* ctxt, isize align, isize width, isize items)
     {
-        gr_expect(ctxt == 0, "The context must not exist");
+        gr_exec_expect(ctxt == 0, "The context must not exist");
 
         return (byte*) calloc(items, width);
     }
@@ -40,7 +40,7 @@ namespace gr
     void
     base_release(void* ctxt, byte* block, isize width, isize items)
     {
-        gr_expect(ctxt == 0, "The context must not exist");
+        gr_exec_expect(ctxt == 0, "The context must not exist");
 
         free(block);
     }

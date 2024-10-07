@@ -59,7 +59,7 @@ shader_module_init(u32 type, const byte* source)
 void
 shader_module_drop(u32 module)
 {
-    gr_expect(module != 0, "The module does not exist");
+    gr_exec_expect(module != 0, "The module does not exist");
 
     glDeleteShader(module);
 }
@@ -73,8 +73,8 @@ shader_init()
 void
 shader_give_module(u32 shader, u32 module)
 {
-    gr_expect(shader != 0, "The shader does not exist");
-    gr_expect(module != 0, "The module does not exist");
+    gr_exec_expect(shader != 0, "The shader does not exist");
+    gr_exec_expect(module != 0, "The module does not exist");
 
     glAttachShader(shader, module);
 }
@@ -84,7 +84,7 @@ shader_link(u32 shader)
 {
     i32 status = 0;
 
-    gr_expect(shader != 0, "The shader does not exist");
+    gr_exec_expect(shader != 0, "The shader does not exist");
 
     glLinkProgram(shader);
     glGetProgramiv(shader, GL_LINK_STATUS, &status);
@@ -95,7 +95,7 @@ shader_link(u32 shader)
 void
 shader_drop(u32 shader)
 {
-    gr_expect(shader != 0, "The shader does not exist");
+    gr_exec_expect(shader != 0, "The shader does not exist");
 
     glDeleteProgram(shader);
 }

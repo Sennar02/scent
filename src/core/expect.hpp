@@ -1,12 +1,12 @@
-#ifndef GR_CORE_ASSERT_HPP
-#define GR_CORE_ASSERT_HPP
+#ifndef GR_CORE_EXPECT_HPP
+#define GR_CORE_EXPECT_HPP
 
 #include <assert.h>
 
-#define gr_expect(test, mesg) \
-    assert((test) && mesg)
+#define gr_cmpl_expect(test, message) \
+    static_assert(test, message)
 
-#define gr_expectc(test, mesg) \
-    static_assert(test, mesg)
+#define gr_exec_expect(test, message) \
+    assert((test) && message)
 
-#endif // GR_CORE_ASSERT_HPP
+#endif // GR_CORE_EXPECT_HPP
