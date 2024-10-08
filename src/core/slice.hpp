@@ -2,36 +2,12 @@
 #define GR_CORE_SLICE_HPP
 
 #include "types.hpp"
+#include "array.hpp"
 #include "arena.hpp"
 #include "buffer.hpp"
 
 namespace gr
 {
-    template <class Val, isize Len>
-    struct Array {
-        //
-        //
-        //
-        static const isize items = Len;
-
-        //
-        //
-        //
-        Val data[Len];
-
-        //
-        //
-        //
-        const Val&
-        operator[](isize index) const;
-
-        //
-        //
-        //
-        Val&
-        operator[](isize index);
-    };
-
     template <class Val>
     struct Slice {
         //
@@ -65,20 +41,6 @@ namespace gr
     //
     //
     //
-    template <class Val, isize Len>
-    Slice<Val>
-    slice_from(Array<Val, Len>& array);
-
-    //
-    //
-    //
-    template <class Val, isize Len>
-    Slice<Val>
-    slice_from(const Array<Val, Len>& array);
-
-    //
-    //
-    //
     template <class Val>
     Slice<Val>
     slice_copy(Slice<Val>* other, Arena* arena);
@@ -88,14 +50,14 @@ namespace gr
     //
     template <class Val>
     Slice<Val>
-    slice_drop(Slice<Val>* slice);
+    slice_empty(Slice<Val>* slice);
 
     //
     //
     //
     template <class Val>
-    void
-    slice_clear(Slice<Val>* slice);
+    Slice<Val>
+    slice_fill(Slice<Val>* slice, const Val& value);
 
     //
     //
@@ -166,26 +128,6 @@ namespace gr
     //
     //
 
-    template <class Val, isize Len>
-    const Val&
-    Array<Val, Len>::operator[](isize index) const
-    {
-        gr_exec_expect(0 < index && index <= items,
-            "The index must be in range");
-
-        return data[index - 1];
-    }
-
-    template <class Val, isize Len>
-    Val&
-    Array<Val, Len>::operator[](isize index)
-    {
-        gr_exec_expect(0 < index && index <= items,
-            "The index must be in range");
-
-        return data[index - 1];
-    }
-
     template <class Val>
     const Val&
     Slice<Val>::operator[](isize index) const
@@ -206,32 +148,6 @@ namespace gr
         return data[index - 1];
     }
 
-    template <class Val, isize Len>
-    Slice<Val>
-    slice_from(Array<Val, Len>& array)
-    {
-        Slice<Val> self;
-
-        self.data  = array.data;
-        self.items = array.items;
-        self.limit = array.items;
-
-        return self;
-    }
-
-    template <class Val, isize Len>
-    Slice<Val>
-    slice_from(const Array<Val, Len>& array)
-    {
-        Slice<Val> self;
-
-        self.data  = array.data;
-        self.items = array.items;
-        self.limit = array.items;
-
-        return self;
-    }
-
     template <class Val>
     Slice<Val>
     slice_copy(Slice<Val>* other, Arena* arena)
@@ -243,14 +159,19 @@ namespace gr
 
         Slice<Val> self;
 
-        byte*  data = arena_alloc(arena,
+        byte* data = arena_alloc(arena,
             ALIGN_VAL, WIDTH_VAL, other->limit);
 
         if ( data != 0 ) {
             isize bytes = WIDTH_VAL * other->items;
-            auto  bufr  = buffer_init(data, bytes);
+            auto  bufd  = buffer_from(data, bytes);
+            auto  bufs  = buffer_from((byte*) other->data, bytes,
+                BUFFER_STATE_FULL);
 
-            buffer_write(&bufr, (byte*) other->data, bytes);
+            buffer_copy(&bufd, &bufs);
+
+            gr_exec_expect(bufd.error == BUFFER_ERROR_NONE,
+                "The operation must succeed");
 
             self.data  = (Val*) data;
             self.items = other->items;
@@ -262,26 +183,29 @@ namespace gr
 
     template <class Val>
     Slice<Val>
-    slice_drop(Slice<Val>* slice)
-    {
-        gr_exec_except(slice != 0, "The slice must exist");
-
-        auto& self = *slice;
-
-        self.data  = 0;
-        self.items = 0;
-        self.limit = 0;
-    }
-
-    template <class Val>
-    void
-    slice_clear(Slice<Val>* slice)
+    slice_empty(Slice<Val>* slice)
     {
         gr_exec_expect(slice != 0, "The slice must exist");
 
         auto& self = *slice;
 
         self.items = 0;
+
+        return self;
+    }
+
+    template <class Val>
+    Slice<Val>
+    slice_fill(Slice<Val>* slice, const Val& value)
+    {
+        gr_exec_expect(slice != 0, "The slice must exist");
+
+        auto& self = *slice;
+
+        for ( isize i = self.items; i < self.limit; i += 1 )
+            self.data[i] = value;
+
+        return self;
     }
 
     template <class Val>

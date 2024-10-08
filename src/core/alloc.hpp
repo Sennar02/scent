@@ -1,7 +1,6 @@
 #ifndef GR_CORE_ALLOC_HPP
 #define GR_CORE_ALLOC_HPP
 
-#include "expect.hpp"
 #include "types.hpp"
 
 namespace gr
@@ -37,9 +36,6 @@ namespace gr
 
     static const isize WIDTH_ALLOC = gr_type_width(Alloc);
     static const isize ALIGN_ALLOC = gr_type_align(Alloc);
-
-    gr_cmpl_expect(WIDTH_ALLOC == 3 * WIDTH_ISIZE, "Unexpected type width");
-    gr_cmpl_expect(ALIGN_ALLOC == 1 * ALIGN_ISIZE, "Unexpected type alignment");
 
     //
     //

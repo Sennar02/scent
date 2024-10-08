@@ -1,17 +1,32 @@
 #ifndef GR_CORE_ARENA_HPP
 #define GR_CORE_ARENA_HPP
 
-#include "expect.hpp"
 #include "types.hpp"
+#include "array.hpp"
 #include "alloc.hpp"
 
 namespace gr
 {
-    //
-    //
-    //
-    byte*
-    forw_align(byte* pntr, isize align);
+    enum Arena_Panic {
+        ARENA_PANIC_NONE           = 0,
+        ARENA_PANIC_NO_MORE_MEMORY = 1,
+        ARENA_PANIC_LIMITED_GROWTH = 2,
+
+        ARENA_PANIC_COUNT = ARENA_PANIC_LIMITED_GROWTH,
+    };
+
+    static const Array<const byte*, ARENA_PANIC_COUNT> ARENA_PANIC_TITLE = {
+        "ARENA_PANIC_NO_MORE_MEMORY",
+        "ARENA_PANIC_LIMITED_GROWTH",
+    };
+
+    static const Array<const byte*, ARENA_PANIC_COUNT> ARENA_PANIC_DESCR = {
+        "The allocators has run out of memory",
+        "The arena's grow factor is too low to satisfy the request",
+    };
+
+    static const f32 ARENA_GROW_NONE = 0.0f;
+    static const f32 ARENA_GROW_BASE = 2.0f;
 
     struct Arena_Node {
         //
@@ -35,6 +50,9 @@ namespace gr
         Arena_Node* next = 0;
     };
 
+    static const isize WIDTH_ARENA_NODE = gr_type_width(Arena_Node);
+    static const isize ALIGN_ARENA_NODE = gr_type_align(Arena_Node);
+
     struct Arena {
         //
         //
@@ -54,52 +72,28 @@ namespace gr
         //
         //
         //
-        byte* error_func = 0;
+        byte* panic_func = 0;
 
         //
         //
         //
-        byte* error_ctxt = 0;
+        byte* panic_ctxt = 0;
     };
+
+    static const isize WIDTH_ARENA = gr_type_width(Arena);
+    static const isize ALIGN_ARENA = gr_type_align(Arena);
 
     //
     //
     //
-    using Arena_Error_Func = byte*
-        (void* ctxt, Arena* arena, isize error);
+    using Arena_Panic_Func = byte*
+        (void* ctxt, Arena* arena, Arena_Panic panic);
 
-    static const isize WIDTH_ARENA_NODE = gr_type_width(Arena_Node);
-    static const isize WIDTH_ARENA      = gr_type_width(Arena);
-
-    gr_cmpl_expect(WIDTH_ARENA_NODE == 4 * WIDTH_ISIZE,               "Unexpected type width");
-    gr_cmpl_expect(WIDTH_ARENA      == 4 * WIDTH_ISIZE + WIDTH_ALLOC, "Unexpected type width");
-
-    static const isize ALIGN_ARENA_NODE = gr_type_align(Arena_Node);
-    static const isize ALIGN_ARENA      = gr_type_align(Arena);
-
-    gr_cmpl_expect(ALIGN_ARENA_NODE == 1 * ALIGN_ISIZE, "Unexpected type alignment");
-    gr_cmpl_expect(ALIGN_ARENA      == 1 * ALIGN_ISIZE, "Unexpected type alignment");
-
-    static const f32 ARENA_GROW_NONE = 0.0f;
-
-    static const isize ARENA_ERROR_NO_MORE_MEMORY = 1;
-    static const isize ARENA_ERROR_UNABLE_TO_GROW = 2;
-
-    static const isize ARENA_ERROR_COUNT =
-        ARENA_ERROR_UNABLE_TO_GROW;
-
-    static const byte* ARENA_ERROR_NAME[] = {
-        "ARENA_ERROR_NO_MORE_MEMORY",
-        "ARENA_ERROR_UNABLE_TO_GROW",
-    };
-
-    static const byte* ARENA_ERROR_TITLE[] = {
-        "The system has run out of memory",
-        "The request can't be satisfied because the arena's grow factor is too low",
-    };
-
+    //
+    //
+    //
     byte*
-    base_error_func(void* ctxt, Arena* arena, isize error);
+    forw_align(byte* pntr, isize align);
 
     //
     //
@@ -129,7 +123,7 @@ namespace gr
     //
     //
     Arena
-    arena_init(isize width, isize items, f32 grow_factor);
+    arena_init(isize width, isize items, f32 grow_factor = ARENA_GROW_BASE);
 
     //
     //
@@ -158,8 +152,8 @@ namespace gr
     //
     //
     //
-    Arena_Error_Func*
-    arena_set_error_func(Arena* arena, void* ctxt, Arena_Error_Func* func);
+    Arena_Panic_Func*
+    arena_set_panic_func(Arena* arena, void* ctxt, Arena_Panic_Func* func);
 
     //
     //

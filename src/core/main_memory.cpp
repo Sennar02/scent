@@ -16,6 +16,8 @@ main()
     slice = slice_insert(&slice, &arena, 1, Array<i32, 8> {1, 2, 3, 4, 5, 6, 7, 8});
     other = slice_copy(&slice, &arena);
 
+    slice = slice_resize(&slice, &arena, 16);
+
     gr_exec_expect(slice.data != other.data, "");
 
     printf("slice(%li/%li):\n", slice.items, slice.limit);
@@ -32,7 +34,7 @@ main()
     for ( isize i = 1; i <= slice.items; i += 1 )
         printf("%2li. %i\n", i, slice[i]);
 
-    slice_clear(&slice);
+    slice_empty(&slice);
 
     printf("\nslice(%li/%li):\n", slice.items, slice.limit);
     for ( isize i = 1; i <= slice.items; i += 1 )
