@@ -1,21 +1,32 @@
 #ifndef GR_CORE_ARRAY_HPP
 #define GR_CORE_ARRAY_HPP
 
-#include "types.hpp"
+#include <core/types.hpp>
 
 namespace gr
 {
-    template <class Val, isize Len>
+    template <class Val>
     struct Array {
         //
         //
         //
-        static const isize items = Len;
+        const Val* data = 0;
 
         //
         //
         //
-        Val data[Len];
+        isize items = 0;
+
+        //
+        //
+        //
+        Array() = default;
+
+        //
+        //
+        //
+        template <isize Len>
+        constexpr Array(const Val (&seq)[Len]);
 
         //
         //
@@ -32,13 +43,20 @@ namespace gr
 
     //
     //
-    // Implementation.
+    // Implementation
     //
     //
 
-    template <class Val, isize Len>
+    template <class Val>
+    template <isize Len>
+    constexpr Array<Val>::Array(const Val (&seq)[Len])
+        : data {seq}
+        , items {Len}
+    {}
+
+    template <class Val>
     const Val&
-    Array<Val, Len>::operator[](isize index) const
+    Array<Val>::operator[](isize index) const
     {
         gr_exec_expect(0 < index && index <= items,
             "The index must be in range");
@@ -46,9 +64,9 @@ namespace gr
         return data[index - 1];
     }
 
-    template <class Val, isize Len>
+    template <class Val>
     Val&
-    Array<Val, Len>::operator[](isize index)
+    Array<Val>::operator[](isize index)
     {
         gr_exec_expect(0 < index && index <= items,
             "The index must be in range");

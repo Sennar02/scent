@@ -1,32 +1,42 @@
 #ifndef GR_CORE_ARENA_HPP
 #define GR_CORE_ARENA_HPP
 
-#include "types.hpp"
-#include "array.hpp"
-#include "alloc.hpp"
+#include <core/types.hpp>
+#include <core/alloc.hpp>
+#include <core/array.hpp>
+#include <core/str8.hpp>
 
 namespace gr
 {
-    enum Arena_Panic {
-        ARENA_PANIC_NONE           = 0,
-        ARENA_PANIC_NO_MORE_MEMORY = 1,
-        ARENA_PANIC_LIMITED_GROWTH = 2,
+    struct Arena_Node;
+    struct Arena;
 
-        ARENA_PANIC_COUNT = ARENA_PANIC_LIMITED_GROWTH,
+    enum Arena_Error {
+        ARENA_ERROR_NONE           = 0,
+        ARENA_ERROR_NO_MORE_MEMORY = 1,
+        ARENA_ERROR_LIMITED_GROWTH = 2,
+
+        ARENA_ERROR_COUNT = ARENA_ERROR_LIMITED_GROWTH,
     };
 
-    static const Array<const byte*, ARENA_PANIC_COUNT> ARENA_PANIC_TITLE = {
-        "ARENA_PANIC_NO_MORE_MEMORY",
-        "ARENA_PANIC_LIMITED_GROWTH",
+    static const Array<Str8> ARENA_ERROR_TITLE = (const Str8[]) {
+        "ARENA_ERROR_NO_MORE_MEMORY",
+        "ARENA_ERROR_LIMITED_GROWTH",
     };
 
-    static const Array<const byte*, ARENA_PANIC_COUNT> ARENA_PANIC_DESCR = {
+    static const Array<Str8> ARENA_ERROR_DESCR = (const Str8[]) {
         "The allocators has run out of memory",
         "The arena's grow factor is too low to satisfy the request",
     };
 
     static const f32 ARENA_GROW_NONE = 0.0f;
     static const f32 ARENA_GROW_BASE = 2.0f;
+
+    //
+    //
+    //
+    using Arena_Error_Func = byte*
+        (void* ctxt, Arena* arena, Arena_Error error);
 
     struct Arena_Node {
         //
@@ -62,32 +72,27 @@ namespace gr
         //
         //
         //
+        byte* (*error_func)
+            (void* ctxt, Arena* arena, Arena_Error error) = 0;
+
+        //
+        //
+        //
+        byte* error_ctxt = 0;
+
+        //
+        //
+        //
         Arena_Node* list = 0;
 
         //
         //
         //
         f32 grow_factor = 0;
-
-        //
-        //
-        //
-        byte* panic_func = 0;
-
-        //
-        //
-        //
-        byte* panic_ctxt = 0;
     };
 
     static const isize WIDTH_ARENA = gr_type_width(Arena);
     static const isize ALIGN_ARENA = gr_type_align(Arena);
-
-    //
-    //
-    //
-    using Arena_Panic_Func = byte*
-        (void* ctxt, Arena* arena, Arena_Panic panic);
 
     //
     //
@@ -99,13 +104,7 @@ namespace gr
     //
     //
     Arena_Node
-    arena_node_init(byte* block, isize bytes);
-
-    //
-    //
-    //
-    void
-    arena_node_drop(Arena_Node* node);
+    arena_node_from(byte* block, isize bytes);
 
     //
     //
@@ -114,7 +113,7 @@ namespace gr
     arena_node_alloc(Arena_Node* node, isize aling, isize width, isize items);
 
     //
-    //
+    // todo(trakot02): Maybe specify where to reset?
     //
     void
     arena_node_reset(Arena_Node* node);
@@ -152,8 +151,14 @@ namespace gr
     //
     //
     //
-    Arena_Panic_Func*
-    arena_set_panic_func(Arena* arena, void* ctxt, Arena_Panic_Func* func);
+    Arena_Error_Func*
+    arena_set_error_func(Arena* arena, Arena_Error_Func* func);
+
+    //
+    //
+    //
+    void*
+    arena_set_error_ctxt(Arena* arena, void* ctxt);
 
     //
     //

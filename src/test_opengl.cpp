@@ -4,15 +4,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "expect.hpp"
-#include "types.hpp"
+#include <core/expect.hpp>
+#include <core/types.hpp>
+#include <core/str8.hpp>
 
 #define LINE(x) \
     x "\n"
 
 using namespace gr;
 
-const byte* vert_module =
+static const Str8 vert_module =
     LINE("#version 330 core")
     LINE("")
     LINE("layout (location = 0) in vec4 vert_point;")
@@ -26,7 +27,7 @@ const byte* vert_module =
     LINE(    "frag_color  = vert_color;")
     LINE("}");
 
-const byte* frag_module =
+static const Str8 frag_module =
     LINE("#version 330 core")
     LINE("")
     LINE("in  vec4 frag_color;")
@@ -38,12 +39,12 @@ const byte* frag_module =
     LINE("}");
 
 u32
-shader_module_init(u32 type, const byte* source)
+shader_module_init(u32 type, Str8 source)
 {
     u32 module = glCreateShader(type);
     i32 status = 0;
 
-    glShaderSource(module, 1, &source, 0);
+    glShaderSource(module, 1, &source.data, 0);
     glCompileShader(module);
 
     glGetShaderiv(module, GL_COMPILE_STATUS, &status);

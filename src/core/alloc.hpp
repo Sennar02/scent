@@ -1,37 +1,27 @@
 #ifndef GR_CORE_ALLOC_HPP
 #define GR_CORE_ALLOC_HPP
 
-#include "types.hpp"
+#include <core/types.hpp>
 
 namespace gr
 {
-    //
-    //
-    //
-    using Request_Func = byte*
-        (void* ctxt, isize align, isize width, isize items);
-
-    //
-    //
-    //
-    using Release_Func = void
-        (void* ctxt, byte* block, isize width, isize items);
-
     struct Alloc {
         //
         //
         //
-        byte* request_func = 0;
+        byte* (*request_func)
+            (void* ctxt, isize align, isize width, isize items) = 0;
 
         //
         //
         //
-        byte* release_func = 0;
+        void (*release_func)
+            (void* ctxt, byte* block, isize width, isize items) = 0;
 
         //
         //
         //
-        byte* alloc_ctxt = 0;
+        byte* ctxt = 0;
     };
 
     static const isize WIDTH_ALLOC = gr_type_width(Alloc);
@@ -53,7 +43,7 @@ namespace gr
     //
     //
     Alloc
-    base_alloc_init();
+    base_alloc();
 } // namespace gr
 
 #endif // GR_CORE_ALLOC_HPP

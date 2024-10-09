@@ -1,29 +1,43 @@
 #include <malloc.h>
 #include <stdio.h>
 
-#include "arena.hpp"
-#include "buffer.hpp"
+#include <core/arena.hpp>
+#include <core/buff.hpp>
 
 namespace gr
 {
     byte*
-    base_panic_func(void* ctxt, Arena* arena, Arena_Panic panic)
+    base_error_func(void* ctxt, Arena* arena, Arena_Error error)
     {
-        gr_exec_expect(arena != 0, "The arena must exist");
         gr_exec_expect(ctxt  == 0, "The context must not exist");
+        gr_exec_expect(arena != 0, "The arena must exist");
 
-        f32 grow_factor = arena->grow_factor;
+        auto& self = *arena;
 
         fprintf(stderr,
-            "\x1b[31m[PANIC]\x1b[0m panic %u, %s:\n"
-            "\x1b[31m[PANIC]\x1b[0m     %s\n"
-            "\x1b[31m[PANIC]\x1b[0m\n"
-            "\x1b[31m[PANIC]\x1b[0m from arena 0x%lx:\n"
-            "\x1b[31m[PANIC]\x1b[0m     grow_factor = %f\n",
-            panic,
-            ARENA_PANIC_TITLE[panic],
-            ARENA_PANIC_DESCR[panic],
-            (usize) arena, grow_factor);
+            "\x1b[31m[ERROR]\x1b[0m error %u, %s:\n"
+            "\x1b[31m[ERROR]\x1b[0m     %s\n"
+            "\x1b[31m[ERROR]\x1b[0m\n"
+            "\x1b[31m[ERROR]\x1b[0m from arena 0x%lx:\n"
+            "\x1b[31m[ERROR]\x1b[0m     grow_factor = %f\n",
+            error,
+            ARENA_ERROR_TITLE[error].data,
+            ARENA_ERROR_DESCR[error].data,
+            (usize) arena, self.grow_factor);
+
+        return 0;
+    }
+
+    byte*
+    arena_error(Arena* arena, Arena_Error error)
+    {
+        gr_exec_expect(arena != 0, "The arena must exist");
+
+        auto& self = *arena;
+        auto* func = self.error_func;
+
+        if ( error != ARENA_ERROR_NONE && func != 0 )
+            return (*func)(self.error_ctxt, arena, error);
 
         return 0;
     }
@@ -43,33 +57,18 @@ namespace gr
     }
 
     Arena_Node
-    arena_node_init(byte* block, isize bytes)
+    arena_node_from(byte* block, isize bytes)
     {
+        gr_exec_expect(block != 0, "The block must exist");
+        gr_exec_expect(bytes >= 0, "The bytes must be positive or zero");
+
         Arena_Node self;
 
-        if ( bytes <= 0 ) return self;
-
         self.head = block;
-
-        if ( self.head != 0 ) {
-            self.tail = self.head + bytes;
-            self.curr = self.head;
-        }
+        self.tail = block + bytes;
+        self.curr = block;
 
         return self;
-    }
-
-    void
-    arena_node_drop(Arena_Node* node)
-    {
-        gr_exec_expect(node != 0, "The node must exist");
-
-        auto& self = *node;
-
-        self.head = 0;
-        self.tail = 0;
-        self.curr = 0;
-        self.next = 0;
     }
 
     byte*
@@ -79,10 +78,11 @@ namespace gr
         gr_exec_expect(align  > 0, "The alignment must be positive");
         gr_exec_expect(width  > 0, "The width must be positive");
 
-        auto& self = *node;
+        if ( items <= 0 ) return 0;
 
-        byte* pntr = 0;
+        auto& self = *node;
         byte* curr = forw_align(self.curr, align);
+        byte* resl = 0;
 
         gr_exec_expect(align > 0 && (((usize) curr) & (align - 1)) == 0,
             "The result is not aligned properly");
@@ -91,15 +91,15 @@ namespace gr
         isize extra = curr - self.curr;
 
         if ( items <= (avail - extra) / width ) {
-            auto buff = buffer_from(curr, width * items);
+            auto buff = buff_from(curr, 0, width * items);
 
             self.curr = curr + width * items;
-            pntr      = curr;
+            resl      = curr;
 
-            buffer_fill(&buff, 0);
+            buff_fill(&buff, 0);
         }
 
-        return pntr;
+        return resl;
     }
 
     void
@@ -116,20 +116,21 @@ namespace gr
     arena_attach(Arena* arena, isize bytes)
     {
         gr_exec_expect(arena != 0, "The arena must exist");
+        gr_exec_expect(bytes >= 0, "The bytes must be positive or zero");
 
         auto& self = *arena;
 
         if ( bytes <= 0 ) return 0;
 
         if ( bytes <= MAX_ISIZE - WIDTH_ARENA_NODE ) {
-            byte* pntr = alloc_request(&self.allocator,
+            byte* block = alloc_request(&self.allocator,
                 ALIGN_ARENA_NODE, bytes + WIDTH_ARENA_NODE, 1);
 
-            auto* node  = (Arena_Node*) pntr;
-            auto* block = pntr + WIDTH_ARENA_NODE;
+            auto* node = (Arena_Node*) block;
+            auto* resl = block + WIDTH_ARENA_NODE;
 
             if ( node != 0 )
-                *node = arena_node_init(block, bytes);
+                *node = arena_node_from(resl, bytes);
 
             return node;
         }
@@ -150,31 +151,16 @@ namespace gr
             (byte*) node, bytes + WIDTH_ARENA_NODE, 1);
     }
 
-    byte*
-    arena_panic(Arena* arena, Arena_Panic panic)
-    {
-        gr_exec_expect(arena != 0, "The arena must exist");
-
-        auto& self = *arena;
-        auto* func = (Arena_Panic_Func*) self.panic_func;
-
-        if ( self.panic_func != 0 && panic != ARENA_PANIC_NONE )
-            return (*func)(self.panic_ctxt, arena, panic);
-
-        return 0;
-    }
-
     Arena
     arena_init(isize width, isize items, f32 grow_factor)
     {
         gr_exec_expect(width > 0, "The width must be positive");
 
         Arena self;
-        byte* pntr = 0;
 
-        self.allocator   = base_alloc_init();
+        self.allocator   = base_alloc();
+        self.error_func  = &base_error_func;
         self.grow_factor = ARENA_GROW_BASE;
-        self.panic_func  = (byte*) &base_panic_func;
 
         if ( items <= MAX_ISIZE / width ) {
             self.list = arena_attach(&self, width * items);
@@ -203,10 +189,10 @@ namespace gr
         }
 
         self.allocator   = {};
+        self.error_func  = 0;
+        self.error_ctxt  = 0;
         self.list        = 0;
         self.grow_factor = ARENA_GROW_BASE;
-        self.panic_func  = 0;
-        self.panic_ctxt  = 0;
     }
 
     byte*
@@ -219,11 +205,11 @@ namespace gr
         auto& self = *arena;
         auto* node = self.list;
 
-        byte* pntr = arena_node_alloc(node, align, width, items);
+        byte* resl = arena_node_alloc(node, align, width, items);
 
-        while ( pntr == 0 ) {
+        while ( resl == 0 ) {
             if ( self.grow_factor == ARENA_GROW_NONE )
-                return arena_panic(arena, ARENA_PANIC_LIMITED_GROWTH);
+                return arena_error(arena, ARENA_ERROR_LIMITED_GROWTH);
 
             isize bytes = node->tail - node->head;
             isize grown = 0;
@@ -233,38 +219,38 @@ namespace gr
 
             if ( node->next == 0 ) {
                 if ( items > grown / width && grown <= bytes )
-                    return arena_panic(arena, ARENA_PANIC_LIMITED_GROWTH);
+                    return arena_error(arena, ARENA_ERROR_LIMITED_GROWTH);
 
                 node->next = arena_attach(arena, grown);
 
                 if ( node->next == 0 )
-                    return arena_panic(arena, ARENA_PANIC_NO_MORE_MEMORY);
+                    return arena_error(arena, ARENA_ERROR_NO_MORE_MEMORY);
             }
 
             node = node->next;
-            pntr = arena_node_alloc(node, align, width, items);
+            resl = arena_node_alloc(node, align, width, items);
         }
 
-        return pntr;
+        return resl;
     }
 
     byte*
     arena_resize(Arena* arena, byte* block, isize align, isize width, isize items)
     {
-        byte* pntr = arena_alloc(arena, align, width, items);
+        byte* resl = arena_alloc(arena, align, width, items);
+        isize size = width * items;
 
-        if ( pntr != 0 && block != 0 ) {
-            auto bufd = buffer_from(pntr,  width * items);
-            auto bufs = buffer_from(block, width * items,
-                BUFFER_STATE_FULL);
+        if ( resl != 0 && block != 0 ) {
+            auto  bufd = buff_from(resl,     0, size);
+            auto  bufs = buff_from(block, size, size);
 
-            buffer_copy(&bufd, &bufs);
+            buff_copy(&bufd, &bufs);
 
-            gr_exec_expect(bufd.error == BUFFER_ERROR_NONE,
+            gr_exec_expect(bufd.error == BUFF_ERROR_NONE,
                 "The operation must succeed");
         }
 
-        return pntr;
+        return resl;
     }
 
     void
@@ -284,18 +270,30 @@ namespace gr
         }
     }
 
-    Arena_Panic_Func*
-    arena_set_panic_func(Arena* arena, void* ctxt, Arena_Panic_Func* func)
+    Arena_Error_Func*
+    arena_set_error_func(Arena* arena, Arena_Error_Func* func)
     {
         gr_exec_expect(arena != 0, "The arena must exist");
 
         auto& self = *arena;
-        auto* temp = self.panic_func;
+        auto* temp = self.error_func;
 
-        self.panic_func = (byte*) func;
-        self.panic_ctxt = (byte*) ctxt;
+        self.error_func = func;
 
-        return (Arena_Panic_Func*) temp;
+        return temp;
+    }
+
+    void*
+    arena_set_error_ctxt(Arena* arena, void* ctxt)
+    {
+        gr_exec_expect(arena != 0, "The arena must exist");
+
+        auto& self = *arena;
+        auto* temp = self.error_ctxt;
+
+        self.error_ctxt = (byte*) ctxt;
+
+        return ctxt;
     }
 
     Alloc

@@ -1,10 +1,10 @@
 #ifndef GR_CORE_SLICE_HPP
 #define GR_CORE_SLICE_HPP
 
-#include "types.hpp"
-#include "array.hpp"
-#include "arena.hpp"
-#include "buffer.hpp"
+#include <core/types.hpp>
+#include <core/arena.hpp>
+#include <core/array.hpp>
+#include <core/buff.hpp>
 
 namespace gr
 {
@@ -76,9 +76,9 @@ namespace gr
     //
     //
     //
-    template <class Val, isize Len>
+    template <class Val>
     Slice<Val>
-    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array);
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val>& array);
 
     //
     //
@@ -104,9 +104,9 @@ namespace gr
     //
     //
     //
-    template <class Val, isize Len>
+    template <class Val>
     Slice<Val>
-    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array);
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val>& array);
 
     //
     //
@@ -164,13 +164,13 @@ namespace gr
 
         if ( data != 0 ) {
             isize bytes = WIDTH_VAL * other->items;
-            auto  bufd  = buffer_from(data, bytes);
-            auto  bufs  = buffer_from((byte*) other->data, bytes,
-                BUFFER_STATE_FULL);
+            auto  bufd  = buff_from(data, 0, bytes);
+            auto  bufs  = buff_from((byte*) other->data,
+                bytes, bytes);
 
-            buffer_copy(&bufd, &bufs);
+            buff_copy(&bufd, &bufs);
 
-            gr_exec_expect(bufd.error == BUFFER_ERROR_NONE,
+            gr_exec_expect(bufd.error == BUFF_ERROR_NONE,
                 "The operation must succeed");
 
             self.data  = (Val*) data;
@@ -272,9 +272,9 @@ namespace gr
         return resl;
     }
 
-    template <class Val, isize Len>
+    template <class Val>
     Slice<Val>
-    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array)
+    slice_insert(Slice<Val>* slice, Arena* arena, isize index, const Array<Val>& array)
     {
         gr_exec_expect(slice != 0, "The slice must exist");
 
@@ -404,9 +404,9 @@ namespace gr
         return resl;
     }
 
-    template <class Val, isize Len>
+    template <class Val>
     Slice<Val>
-    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val, Len>& array)
+    slice_push(Slice<Val>* slice, Arena* arena, isize index, const Array<Val>& array)
     {
         gr_exec_expect(slice != 0, "The slice must exist");
 

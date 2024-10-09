@@ -1,3 +1,5 @@
+require "ecc/ecc"
+
 workspace "forgotten_blood"
     configurations { "debug", "release" }
     architecture "x86_64"
@@ -7,7 +9,7 @@ workspace "forgotten_blood"
 
     pic "on"
 
-    include "src/core"
+    include "src"
 
     include "ext/glad"
     include "ext/GLFW"

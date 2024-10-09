@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "expect.hpp"
+#include <core/expect.hpp>
 
 #define gr_type_width(type) ((isize)  sizeof(type))
 #define gr_type_align(type) ((isize) alignof(type))

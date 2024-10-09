@@ -1,6 +1,6 @@
 #include <malloc.h>
 
-#include "alloc.hpp"
+#include <core/alloc.hpp>
 
 namespace gr
 {
@@ -13,8 +13,8 @@ namespace gr
 
         auto& self = *alloc;
 
-        return ((Request_Func*) self.request_func)
-            (self.alloc_ctxt, align, width, items);
+        return (*self.request_func)
+            (self.ctxt, align, width, items);
     }
 
     void
@@ -25,8 +25,8 @@ namespace gr
 
         auto& self = *alloc;
 
-        return ((Release_Func*) self.release_func)
-            (self.alloc_ctxt, block, width, items);
+        return (*self.release_func)
+            (self.ctxt, block, width, items);
     }
 
     byte*
@@ -46,12 +46,12 @@ namespace gr
     }
 
     Alloc
-    base_alloc_init()
+    base_alloc()
     {
         Alloc self;
 
-        self.request_func = (byte*) &base_request;
-        self.release_func = (byte*) &base_release;
+        self.request_func = &base_request;
+        self.release_func = &base_release;
 
         return self;
     }

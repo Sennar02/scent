@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "types.hpp"
-#include "arena.hpp"
-#include "slice.hpp"
+#include <core/types.hpp>
+#include <core/arena.hpp>
+#include <core/slice.hpp>
 
 using namespace gr;
 
@@ -13,7 +13,7 @@ main()
     Slice<i32> slice = {};
     Slice<i32> other = {};
 
-    slice = slice_insert(&slice, &arena, 1, Array<i32, 8> {1, 2, 3, 4, 5, 6, 7, 8});
+    slice = slice_insert(&slice, &arena, 1, Array<i32>({1, 2, 3, 4, 5, 6, 7, 8}));
     other = slice_copy(&slice, &arena);
 
     slice = slice_resize(&slice, &arena, 16);

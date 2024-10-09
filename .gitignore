@@ -9,4 +9,6 @@ Makefile
 *.vcxproj*
 *.sln
 
+compile_commands.json
+
 !.gitignore

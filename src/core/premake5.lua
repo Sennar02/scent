@@ -1,63 +1,28 @@
 project "core"
     kind       "staticlib"
     language   "c++"
-    cppdialect "c++11"
+    cppdialect "c++14"
+
+    includedirs { ".." }
 
     files {
         "expect.hpp",
         "types.hpp",
+        "array.hpp",
+        "str8.hpp",
+        "buff.hpp",
+        "writer.hpp",
         "alloc.hpp",
         "arena.hpp",
-        "buffer.hpp",
         "slice.hpp",
+        "file.hpp",
 
-        "buffer.cpp",
+        "str8.cpp",
+        "buff.cpp",
+        "writer.cpp",
         "alloc.cpp",
         "arena.cpp",
-    }
-
-    filter { "configurations:debug" }
-        symbols "on"
-
-    filter { "configurations:release" }
-        optimize "on"
-
-project "opengl_test"
-    kind       "consoleapp"
-    language   "c++"
-    cppdialect "c++11"
-
-    includedirs {
-        "../../ext/glad/include",
-        "../../ext/GLFW/include",
-    }
-
-    links { "core", "glad", "GLFW" }
-
-    files {
-        "main_opengl.cpp",
-    }
-
-    filter { "configurations:debug" }
-        symbols "on"
-
-    filter { "configurations:release" }
-        optimize "on"
-
-project "memory_test"
-    kind       "consoleapp"
-    language   "c++"
-    cppdialect "c++11"
-
-    includedirs {
-        "../../ext/glad/include",
-        "../../ext/GLFW/include",
-    }
-
-    links { "core", "glad", "GLFW" }
-
-    files {
-        "main_memory.cpp",
+        "file.cpp",
     }
 
     filter { "configurations:debug" }
